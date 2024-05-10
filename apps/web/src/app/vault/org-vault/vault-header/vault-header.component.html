@@ -28,7 +28,11 @@
   </bit-breadcrumbs>
 
   <ng-container slot="title-suffix">
-    <ng-container *ngIf="collection != null && (canEditCollection || canDeleteCollection)">
+    <ng-container
+      *ngIf="
+        collection != null && (canEditCollection || canDeleteCollection || canViewCollectionInfo)
+      "
+    >
       <button
         bitIconButton="bwi-angle-down"
         [bitMenuTriggerFor]="editCollectionMenu"
