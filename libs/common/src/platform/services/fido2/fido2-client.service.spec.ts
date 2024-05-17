@@ -151,6 +151,16 @@ describe("FidoAuthenticatorService", () => {
         await rejects.toBeInstanceOf(DOMException);
       });
 
+      it("should not throw error if localhost is http", async () => {
+        const params = createParams({
+          origin: "http://localhost",
+          rp: { id: undefined, name: "localhost" },
+        });
+        authenticator.makeCredential.mockResolvedValue(createAuthenticatorMakeResult());
+
+        await client.createCredential(params, tab);
+      });
+
       // Spec: If credTypesAndPubKeyAlgs is empty, return a DOMException whose name is "NotSupportedError", and terminate this algorithm.
       it("should throw error if no support key algorithms were found", async () => {
         const params = createParams({
@@ -505,6 +515,16 @@ describe("FidoAuthenticatorService", () => {
           tab,
           expect.anything(),
         );
+      });
+
+      it("should not throw error if localhost is http", async () => {
+        const params = createParams({
+          origin: "http://localhost",
+        });
+        params.rpId = undefined;
+        authenticator.getAssertion.mockResolvedValue(createAuthenticatorAssertResult());
+
+        await client.assertCredential(params, tab);
       });
     });
 
