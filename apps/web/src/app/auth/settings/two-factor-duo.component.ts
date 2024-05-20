@@ -1,5 +1,5 @@
 import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
-import { Component, Inject } from "@angular/core";
+import { Component, EventEmitter, Inject, Output } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -20,6 +20,7 @@ import { TwoFactorBaseComponent } from "./two-factor-base.component";
   templateUrl: "two-factor-duo.component.html",
 })
 export class TwoFactorDuoComponent extends TwoFactorBaseComponent {
+  @Output() onChangeStatus: EventEmitter<boolean> = new EventEmitter();
   type = TwoFactorProviderType.Duo;
   formPromise: Promise<TwoFactorDuoResponse>;
   formGroup = this.formBuilder.group({
@@ -82,8 +83,10 @@ export class TwoFactorDuoComponent extends TwoFactorBaseComponent {
     }
     if (this.enabled) {
       await this.disableDuo();
+      this.onChangeStatus.emit(this.enabled);
     } else {
       await this.enable();
+      this.onChangeStatus.emit(this.enabled);
     }
   };
   private disableDuo() {
