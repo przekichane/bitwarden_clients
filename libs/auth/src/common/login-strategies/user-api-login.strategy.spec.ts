@@ -21,6 +21,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { SymmetricCryptoKey } from "@bitwarden/common/platform/models/domain/symmetric-crypto-key";
+import { VaultTimeoutSettingsService } from "@bitwarden/common/services/vault-timeout/vault-timeout-settings.service";
 import { FakeAccountService, mockAccountServiceWith } from "@bitwarden/common/spec";
 import { CsprngArray } from "@bitwarden/common/types/csprng";
 import { UserId } from "@bitwarden/common/types/guid";
@@ -50,10 +51,14 @@ describe("UserApiLoginStrategy", () => {
   let keyConnectorService: MockProxy<KeyConnectorService>;
   let environmentService: MockProxy<EnvironmentService>;
   let billingAccountProfileStateService: MockProxy<BillingAccountProfileStateService>;
+  let vaultTimeoutSettingsService: MockProxy<VaultTimeoutSettingsService>;
   let kdfConfigService: MockProxy<KdfConfigService>;
 
   let apiLogInStrategy: UserApiLoginStrategy;
   let credentials: UserApiLoginCredentials;
+
+  const mockVaultTimeoutAction = VaultTimeoutAction.Lock;
+  const mockVaultTimeout = 1000;
 
   const userId = Utils.newGuid() as UserId;
   const deviceId = Utils.newGuid();
@@ -78,11 +83,14 @@ describe("UserApiLoginStrategy", () => {
     keyConnectorService = mock<KeyConnectorService>();
     environmentService = mock<EnvironmentService>();
     billingAccountProfileStateService = mock<BillingAccountProfileStateService>();
+    vaultTimeoutSettingsService = mock<VaultTimeoutSettingsService>();
     kdfConfigService = mock<KdfConfigService>();
 
     appIdService.getAppId.mockResolvedValue(deviceId);
     tokenService.getTwoFactorToken.mockResolvedValue(null);
-    tokenService.decodeAccessToken.mockResolvedValue({});
+    tokenService.decodeAccessToken.mockResolvedValue({
+      sub: userId,
+    });
 
     apiLogInStrategy = new UserApiLoginStrategy(
       cache,
@@ -101,10 +109,23 @@ describe("UserApiLoginStrategy", () => {
       environmentService,
       keyConnectorService,
       billingAccountProfileStateService,
+      vaultTimeoutSettingsService,
       kdfConfigService,
     );
 
     credentials = new UserApiLoginCredentials(apiClientId, apiClientSecret);
+
+    const mockVaultTimeoutActionBSub = new BehaviorSubject<VaultTimeoutAction>(
+      mockVaultTimeoutAction,
+    );
+    vaultTimeoutSettingsService.getVaultTimeoutActionByUserId$.mockReturnValue(
+      mockVaultTimeoutActionBSub.asObservable(),
+    );
+
+    const mockVaultTimeoutBSub = new BehaviorSubject<number>(mockVaultTimeout);
+    vaultTimeoutSettingsService.getVaultTimeoutByUserId$.mockReturnValue(
+      mockVaultTimeoutBSub.asObservable(),
+    );
   });
 
   it("sends api key credentials to the server", async () => {
@@ -129,11 +150,6 @@ describe("UserApiLoginStrategy", () => {
   it("sets the local environment after a successful login", async () => {
     apiService.postIdentityToken.mockResolvedValue(identityTokenResponseFactory());
 
-    const mockVaultTimeoutAction = VaultTimeoutAction.Lock;
-    const mockVaultTimeout = 60;
-    stateService.getVaultTimeoutAction.mockResolvedValue(mockVaultTimeoutAction);
-    stateService.getVaultTimeout.mockResolvedValue(mockVaultTimeout);
-
     await apiLogInStrategy.logIn(credentials);
 
     expect(tokenService.setClientId).toHaveBeenCalledWith(
@@ -157,7 +173,7 @@ describe("UserApiLoginStrategy", () => {
     await apiLogInStrategy.logIn(credentials);
 
     expect(cryptoService.setMasterKeyEncryptedUserKey).toHaveBeenCalledWith(tokenResponse.key);
-    expect(cryptoService.setPrivateKey).toHaveBeenCalledWith(tokenResponse.privateKey);
+    expect(cryptoService.setPrivateKey).toHaveBeenCalledWith(tokenResponse.privateKey, userId);
   });
 
   it("gets and sets the master key if Key Connector is enabled", async () => {
@@ -172,7 +188,7 @@ describe("UserApiLoginStrategy", () => {
 
     await apiLogInStrategy.logIn(credentials);
 
-    expect(keyConnectorService.setMasterKeyFromUrl).toHaveBeenCalledWith(keyConnectorUrl);
+    expect(keyConnectorService.setMasterKeyFromUrl).toHaveBeenCalledWith(keyConnectorUrl, userId);
   });
 
   it("decrypts and sets the user key if Key Connector is enabled", async () => {
@@ -188,11 +204,15 @@ describe("UserApiLoginStrategy", () => {
 
     apiService.postIdentityToken.mockResolvedValue(tokenResponse);
     masterPasswordService.masterKeySubject.next(masterKey);
-    cryptoService.decryptUserKeyWithMasterKey.mockResolvedValue(userKey);
+    masterPasswordService.mock.decryptUserKeyWithMasterKey.mockResolvedValue(userKey);
 
     await apiLogInStrategy.logIn(credentials);
 
-    expect(cryptoService.decryptUserKeyWithMasterKey).toHaveBeenCalledWith(masterKey);
-    expect(cryptoService.setUserKey).toHaveBeenCalledWith(userKey);
+    expect(masterPasswordService.mock.decryptUserKeyWithMasterKey).toHaveBeenCalledWith(
+      masterKey,
+      undefined,
+      undefined,
+    );
+    expect(cryptoService.setUserKey).toHaveBeenCalledWith(userKey, userId);
   });
 });

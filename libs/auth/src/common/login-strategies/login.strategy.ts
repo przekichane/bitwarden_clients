@@ -1,6 +1,7 @@
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, filter, firstValueFrom, timeout } from "rxjs";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
+import { VaultTimeoutSettingsService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout-settings.service";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
@@ -75,6 +76,7 @@ export abstract class LoginStrategy {
     protected twoFactorService: TwoFactorService,
     protected userDecryptionOptionsService: InternalUserDecryptionOptionsServiceAbstraction,
     protected billingAccountProfileStateService: BillingAccountProfileStateService,
+    protected vaultTimeoutSettingsService: VaultTimeoutSettingsService,
     protected KdfConfigService: KdfConfigService,
   ) {}
 
@@ -101,7 +103,7 @@ export abstract class LoginStrategy {
   }
 
   protected async startLogIn(): Promise<[AuthResult, IdentityResponse]> {
-    this.twoFactorService.clearSelectedProvider();
+    await this.twoFactorService.clearSelectedProvider();
 
     const tokenRequest = this.cache.value.tokenRequest;
     const response = await this.apiService.postIdentityToken(tokenRequest);
@@ -159,24 +161,19 @@ export abstract class LoginStrategy {
    * It also sets the access token and refresh token in the token service.
    *
    * @param {IdentityTokenResponse} tokenResponse - The response from the server containing the identity token.
-   * @returns {Promise<void>} - A promise that resolves when the account information has been successfully saved.
+   * @returns {Promise<UserId>} - A promise that resolves the the UserId when the account information has been successfully saved.
    */
   protected async saveAccountInformation(tokenResponse: IdentityTokenResponse): Promise<UserId> {
     const accountInformation = await this.tokenService.decodeAccessToken(tokenResponse.accessToken);
+    const userId = accountInformation.sub as UserId;
 
-    const userId = accountInformation.sub;
+    await this.accountService.addAccount(userId, {
+      name: accountInformation.name,
+      email: accountInformation.email,
+      emailVerified: accountInformation.email_verified,
+    });
 
-    const vaultTimeoutAction = await this.stateService.getVaultTimeoutAction({ userId });
-    const vaultTimeout = await this.stateService.getVaultTimeout({ userId });
-
-    // set access token and refresh token before account initialization so authN status can be accurate
-    // User id will be derived from the access token.
-    await this.tokenService.setTokens(
-      tokenResponse.accessToken,
-      vaultTimeoutAction as VaultTimeoutAction,
-      vaultTimeout,
-      tokenResponse.refreshToken, // Note: CLI login via API key sends undefined for refresh token.
-    );
+    await this.accountService.switchAccount(userId);
 
     await this.stateService.addAccount(
       new Account({
@@ -191,8 +188,27 @@ export abstract class LoginStrategy {
       }),
     );
 
+    await this.verifyAccountAdded(userId);
+
+    // We must set user decryption options before retrieving vault timeout settings
+    // as the user decryption options help determine the available timeout actions.
     await this.userDecryptionOptionsService.setUserDecryptionOptions(
       UserDecryptionOptions.fromResponse(tokenResponse),
+    );
+
+    const vaultTimeoutAction = await firstValueFrom(
+      this.vaultTimeoutSettingsService.getVaultTimeoutActionByUserId$(userId),
+    );
+    const vaultTimeout = await firstValueFrom(
+      this.vaultTimeoutSettingsService.getVaultTimeoutByUserId$(userId),
+    );
+
+    // User id will be derived from the access token.
+    await this.tokenService.setTokens(
+      tokenResponse.accessToken,
+      vaultTimeoutAction as VaultTimeoutAction,
+      vaultTimeout,
+      tokenResponse.refreshToken, // Note: CLI login via API key sends undefined for refresh token.
     );
 
     await this.KdfConfigService.setKdfConfig(
@@ -207,7 +223,7 @@ export abstract class LoginStrategy {
     );
 
     await this.billingAccountProfileStateService.setHasPremium(accountInformation.premium, false);
-    return userId as UserId;
+    return userId;
   }
 
   protected async processTokenResponse(response: IdentityTokenResponse): Promise<AuthResult> {
@@ -231,6 +247,7 @@ export abstract class LoginStrategy {
 
     // Must come before setting keys, user key needs email to update additional keys
     const userId = await this.saveAccountInformation(response);
+    result.userId = userId;
 
     if (response.twoFactorToken != null) {
       // note: we can read email from access token b/c it was saved in saveAccountInformation
@@ -239,9 +256,9 @@ export abstract class LoginStrategy {
       await this.tokenService.setTwoFactorToken(userEmail, response.twoFactorToken);
     }
 
-    await this.setMasterKey(response);
+    await this.setMasterKey(response, userId);
     await this.setUserKey(response, userId);
-    await this.setPrivateKey(response);
+    await this.setPrivateKey(response, userId);
 
     this.messagingService.send("loggedIn");
 
@@ -249,9 +266,9 @@ export abstract class LoginStrategy {
   }
 
   // The keys comes from different sources depending on the login strategy
-  protected abstract setMasterKey(response: IdentityTokenResponse): Promise<void>;
+  protected abstract setMasterKey(response: IdentityTokenResponse, userId: UserId): Promise<void>;
   protected abstract setUserKey(response: IdentityTokenResponse, userId: UserId): Promise<void>;
-  protected abstract setPrivateKey(response: IdentityTokenResponse): Promise<void>;
+  protected abstract setPrivateKey(response: IdentityTokenResponse, userId: UserId): Promise<void>;
 
   // Old accounts used master key for encryption. We are forcing migrations but only need to
   // check on password logins
@@ -259,9 +276,10 @@ export abstract class LoginStrategy {
     return false;
   }
 
-  protected async createKeyPairForOldAccount() {
+  protected async createKeyPairForOldAccount(userId: UserId) {
     try {
-      const [publicKey, privateKey] = await this.cryptoService.makeKeyPair();
+      const userKey = await this.cryptoService.getUserKeyWithLegacySupport(userId);
+      const [publicKey, privateKey] = await this.cryptoService.makeKeyPair(userKey);
       await this.apiService.postAccountKeys(new KeysRequest(publicKey, privateKey.encryptedString));
       return privateKey.encryptedString;
     } catch (e) {
@@ -284,7 +302,7 @@ export abstract class LoginStrategy {
     const result = new AuthResult();
     result.twoFactorProviders = response.twoFactorProviders2;
 
-    this.twoFactorService.setProviders(response);
+    await this.twoFactorService.setProviders(response);
     this.cache.next({ ...this.cache.value, captchaBypassToken: response.captchaToken ?? null });
     result.ssoEmail2FaSessionToken = response.ssoEmail2faSessionToken;
     result.email = response.email;
@@ -305,5 +323,25 @@ export abstract class LoginStrategy {
     const result = new AuthResult();
     result.captchaSiteKey = response.siteKey;
     return result;
+  }
+
+  /**
+   * Verifies that the active account is set after initialization.
+   * Note: In browser there is a slight delay between when active account emits in background,
+   * and when it emits in foreground. We're giving the foreground 1 second to catch up.
+   * If nothing is emitted, we throw an error.
+   */
+  private async verifyAccountAdded(expectedUserId: UserId) {
+    await firstValueFrom(
+      this.accountService.activeAccount$.pipe(
+        filter((account) => account?.id === expectedUserId),
+        timeout({
+          first: 1000,
+          with: () => {
+            throw new Error("Expected user never made active user after initialization.");
+          },
+        }),
+      ),
+    );
   }
 }
