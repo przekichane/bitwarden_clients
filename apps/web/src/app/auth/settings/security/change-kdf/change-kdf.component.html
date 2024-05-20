@@ -1,5 +1,5 @@
 <h2 bitTypography="h2">{{ "encKeySettings" | i18n }}</h2>
-<bit-callout type="warning">{{ "changeKdfLoggedOutWarning" | i18n }}</bit-callout>
+<bit-callout type="warning">{{ "kdfSettingsChangeLogoutWarning" | i18n }}</bit-callout>
 <form [formGroup]="formGroup" autocomplete="off">
   <div class="tw-grid tw-grid-cols-12 tw-gap-4">
     <div class="tw-col-span-6">
@@ -25,7 +25,7 @@
           ></bit-option>
         </bit-select>
       </bit-form-field>
-      <bit-form-field formGroupName="kdfConfig" *ngIf="kdfValue == kdfType.Argon2id">
+      <bit-form-field formGroupName="kdfConfig" *ngIf="isArgon2(kdfConfig)">
         <bit-label>{{ "kdfMemory" | i18n }}</bit-label>
         <input
           bitInput
@@ -38,7 +38,7 @@
     </div>
     <div class="tw-col-span-6">
       <div class="tw-mb-0">
-        <bit-form-field formGroupName="kdfConfig" *ngIf="kdfValue == kdfType.PBKDF2_SHA256">
+        <bit-form-field formGroupName="kdfConfig" *ngIf="isPBKDF2(kdfConfig)">
           <bit-label>
             {{ "kdfIterations" | i18n }}
             <a
@@ -60,35 +60,36 @@
             [max]="PBKDF2_ITERATIONS.max"
           />
         </bit-form-field>
-
-        <bit-form-field formGroupName="kdfConfig" *ngIf="kdfValue == kdfType.Argon2id">
-          <bit-label>
-            {{ "kdfIterations" | i18n }}
-          </bit-label>
-          <input
-            bitInput
-            type="number"
-            formControlName="iterations"
-            [min]="ARGON2_ITERATIONS.min"
-            [max]="ARGON2_ITERATIONS.max"
-          />
-        </bit-form-field>
-        <bit-form-field formGroupName="kdfConfig" *ngIf="kdfValue == kdfType.Argon2id">
-          <bit-label>
-            {{ "kdfParallelism" | i18n }}
-          </bit-label>
-          <input
-            bitInput
-            type="number"
-            formControlName="parallelism"
-            [min]="ARGON2_PARALLELISM.min"
-            [max]="ARGON2_PARALLELISM.max"
-          />
-        </bit-form-field>
+        <ng-container *ngIf="isArgon2(kdfConfig)">
+          <bit-form-field formGroupName="kdfConfig">
+            <bit-label>
+              {{ "kdfIterations" | i18n }}
+            </bit-label>
+            <input
+              bitInput
+              type="number"
+              formControlName="iterations"
+              [min]="ARGON2_ITERATIONS.min"
+              [max]="ARGON2_ITERATIONS.max"
+            />
+          </bit-form-field>
+          <bit-form-field formGroupName="kdfConfig">
+            <bit-label>
+              {{ "kdfParallelism" | i18n }}
+            </bit-label>
+            <input
+              bitInput
+              type="number"
+              formControlName="parallelism"
+              [min]="ARGON2_PARALLELISM.min"
+              [max]="ARGON2_PARALLELISM.max"
+            />
+          </bit-form-field>
+        </ng-container>
       </div>
     </div>
     <div class="tw-col-span-12">
-      <ng-container *ngIf="kdfValue == kdfType.PBKDF2_SHA256">
+      <ng-container *ngIf="isPBKDF2(kdfConfig)">
         <p bitTypography="body2" class="tw-text-muted">
           {{ "kdfIterationsDesc" | i18n: (PBKDF2_ITERATIONS.defaultValue | number) }}
         </p>
@@ -96,7 +97,7 @@
           {{ "kdfIterationsWarning" | i18n: (100000 | number) }}
         </bit-callout>
       </ng-container>
-      <ng-container *ngIf="kdfValue == kdfType.Argon2id">
+      <ng-container *ngIf="isArgon2(kdfConfig)">
         <p bitTypography="body2" class="tw-text-muted">{{ "argon2Desc" | i18n }}</p>
         <bit-callout type="warning"> {{ "argon2Warning" | i18n }}</bit-callout>
       </ng-container>
