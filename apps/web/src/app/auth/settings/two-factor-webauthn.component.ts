@@ -1,5 +1,5 @@
 import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
-import { Component, Inject, NgZone } from "@angular/core";
+import { Component, EventEmitter, Inject, NgZone, Output } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
@@ -33,6 +33,7 @@ interface Key {
   templateUrl: "two-factor-webauthn.component.html",
 })
 export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
+  @Output() onChangeStatus = new EventEmitter<boolean>();
   type = TwoFactorProviderType.WebAuthn;
   name: string;
   keys: Key[];
@@ -201,10 +202,7 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
       }
     }
     this.enabled = response.enabled;
-  }
-
-  onClose() {
-    this.dialogRef.close(this.enabled);
+    this.onChangeStatus.emit(this.enabled);
   }
 
   static open(
