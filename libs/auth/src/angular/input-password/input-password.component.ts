@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
 import {
   AsyncActionsModule,
   ButtonModule,
+  CheckboxModule,
   FormFieldModule,
   IconButtonModule,
   InputModule,
@@ -18,6 +19,7 @@ import { SharedModule } from "../../../../components/src/shared";
   imports: [
     AsyncActionsModule,
     ButtonModule,
+    CheckboxModule,
     FormFieldModule,
     IconButtonModule,
     InputModule,
@@ -30,7 +32,7 @@ export class InputPasswordComponent {
     password: ["", Validators.required],
     confirmedPassword: ["", Validators.required],
     hint: [""],
-    checkForDataBreach: [true],
+    checkForBreaches: [true],
   });
 
   constructor(private formBuilder: FormBuilder) {}

@@ -17,6 +17,11 @@ export default {
           provide: I18nService,
           useValue: new I18nMockService({
             masterPassword: "Master password",
+            confirmMasterPassword: "Confirm master password",
+            masterPassHintLabel: "Master password hint",
+            masterPassHintText:
+              "If you forget your password, the password hint can be sent to your email. 0/50 character maximum.",
+            checkForBreaches: "Check known data breaches for this password",
             createAccount: "Create account",
             required: "required", // for Validators.required
             inputRequired: "Input is required.", // for BitErrorComponent error message

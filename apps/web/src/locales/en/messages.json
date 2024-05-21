@@ -752,6 +752,9 @@
   "masterPassHintLabel": {
     "message": "Master password hint"
   },
+  "masterPassHintText": {
+    "message": "If you forget your password, the password hint can be sent to your email. 0/50 character maximum."
+  },
   "settings": {
     "message": "Settings"
   },
