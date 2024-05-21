@@ -16,14 +16,28 @@ export default {
         {
           provide: I18nService,
           useValue: new I18nMockService({
+            // Master password
             masterPassword: "Master password",
+            important: "Important:",
+            masterPassImportant: "Your master password cannot be recovered if you forget it!",
+
+            // Confirm master password
+            characterMinimum: "__$1__ character minimum",
             confirmMasterPassword: "Confirm master password",
+
+            // Master password hint
             masterPassHintLabel: "Master password hint",
             masterPassHintText:
-              "If you forget your password, the password hint can be sent to your email. 0/50 character maximum.",
+              "If you forget your password, the password hint can be sent to your email. __$1__/__$2__ character maximum.",
+
+            // Other
             checkForBreaches: "Check known data breaches for this password",
             createAccount: "Create account",
-            required: "required", // for Validators.required
+
+            // Validators
+            required: "required",
+            inputMaxLength: (max) => `51/${max} character maximum`,
+
             inputRequired: "Input is required.", // for BitErrorComponent error message
             toggleVisibility: "Toggle visibility", // for BitPasswordInputToggleDirective
           }),

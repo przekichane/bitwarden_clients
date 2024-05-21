@@ -28,10 +28,16 @@ import { SharedModule } from "../../../../components/src/shared";
   ],
 })
 export class InputPasswordComponent {
+  minPasswordLength = 12;
+
+  currentHintLength = 0;
+  minHintLength = 0;
+  maxHintLength = 50;
+
   passwordForm = this.formBuilder.group({
-    password: ["", Validators.required],
+    password: ["", Validators.required, Validators.minLength(this.minPasswordLength)],
     confirmedPassword: ["", Validators.required],
-    hint: [""],
+    hint: ["", Validators.maxLength(this.maxHintLength)],
     checkForBreaches: [true],
   });
 
