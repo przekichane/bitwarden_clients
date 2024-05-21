@@ -32,22 +32,9 @@
       </h2>
       <p class="tw-text-lg tw-font-bold">{{ creditOrBalance | currency: "$" }}</p>
       <p bitTypography="body1">{{ "creditAppliedDesc" | i18n }}</p>
-      <button
-        type="button"
-        bitButton
-        buttonType="secondary"
-        (click)="addCredit()"
-        *ngIf="!showAddCredit"
-      >
+      <button type="button" bitButton buttonType="secondary" [bitAction]="addCredit">
         {{ "addCredit" | i18n }}
       </button>
-      <app-add-credit
-        [organizationId]="organizationId"
-        (onAdded)="closeAddCredit(true)"
-        (onCanceled)="closeAddCredit(false)"
-        *ngIf="showAddCredit"
-      >
-      </app-add-credit>
     </bit-section>
     <bit-section>
       <h2 bitTypography="h2">{{ "paymentMethod" | i18n }}</h2>
