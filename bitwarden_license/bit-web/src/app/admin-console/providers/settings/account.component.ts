@@ -1,6 +1,6 @@
 import { Component } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 
 import { UserVerificationDialogComponent } from "@bitwarden/auth/angular";
@@ -35,7 +35,6 @@ export class AccountComponent {
   });
   protected enableDeleteProvider$ = this.configService.getFeatureFlag$(
     FeatureFlag.EnableDeleteProvider,
-    false,
   );
 
   constructor(
@@ -49,6 +48,7 @@ export class AccountComponent {
     private configService: ConfigService,
     private providerApiService: ProviderApiServiceAbstraction,
     private formBuilder: FormBuilder,
+    private router: Router,
   ) {}
 
   async ngOnInit() {
@@ -93,8 +93,9 @@ export class AccountComponent {
     if (providerClients.data != null && providerClients.data.length > 0) {
       await this.dialogService.openSimpleDialog({
         title: { key: "deleteProviderName", placeholders: [this.provider.name] },
-        content: { key: "deleteProviderWarningDesc", placeholders: [this.provider.name] },
+        content: { key: "deleteProviderWarningDescription", placeholders: [this.provider.name] },
         acceptButtonText: { key: "ok" },
+        cancelButtonText: { key: "close" },
         type: "danger",
       });
 
@@ -116,6 +117,7 @@ export class AccountComponent {
     } catch (e) {
       this.logService.error(e);
     }
+    await this.router.navigate(["/"]);
   }
 
   private async verifyUser(): Promise<boolean> {
