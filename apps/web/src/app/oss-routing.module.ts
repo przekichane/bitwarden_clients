@@ -9,6 +9,7 @@ import {
   UnauthGuard,
 } from "@bitwarden/angular/auth/guards";
 
+import { AnonLayoutWrapperComponent } from "../../../../libs/auth/src/angular/anon-layout/anon-layout-wrapper.component";
 import { flagEnabled, Flags } from "../utils/flags";
 
 import { AcceptFamilySponsorshipComponent } from "./admin-console/organizations/sponsorships/accept-family-sponsorship.component";
@@ -104,12 +105,6 @@ const routes: Routes = [
         path: "set-password",
         component: SetPasswordComponent,
         data: { titleId: "setMasterPassword" },
-      },
-      {
-        path: "hint",
-        component: HintComponent,
-        canActivate: [UnauthGuard],
-        data: { titleId: "passwordHint" },
       },
       {
         path: "lock",
@@ -294,6 +289,21 @@ const routes: Routes = [
     path: "organizations",
     loadChildren: () =>
       import("./admin-console/organizations/organization.module").then((m) => m.OrganizationModule),
+  },
+  {
+    path: "",
+    component: AnonLayoutWrapperComponent,
+    children: [
+      {
+        path: "hint",
+        component: HintComponent,
+        canActivate: [UnauthGuard],
+        data: {
+          pageTitle: "passwordHint",
+          titleId: "passwordHint",
+        },
+      },
+    ],
   },
 ];
 

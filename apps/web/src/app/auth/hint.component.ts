@@ -1,5 +1,7 @@
 import { Component } from "@angular/core";
+import { FormBuilder, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
+import { Subject, takeUntil } from "rxjs";
 
 import { HintComponent as BaseHintComponent } from "@bitwarden/angular/auth/components/hint.component";
 import { LoginEmailServiceAbstraction } from "@bitwarden/auth/common";
@@ -13,6 +15,11 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
   templateUrl: "hint.component.html",
 })
 export class HintComponent extends BaseHintComponent {
+  private destroy$ = new Subject<void>();
+  formGroup = this.formBuilder.group({
+    email: ["", [Validators.email, Validators.required]],
+  });
+
   constructor(
     router: Router,
     i18nService: I18nService,
@@ -20,7 +27,25 @@ export class HintComponent extends BaseHintComponent {
     platformUtilsService: PlatformUtilsService,
     logService: LogService,
     loginEmailService: LoginEmailServiceAbstraction,
+    private formBuilder: FormBuilder,
   ) {
     super(router, i18nService, apiService, platformUtilsService, logService, loginEmailService);
   }
+
+  ngOnInit(): void {
+    super.ngOnInit();
+    this.formGroup.get("email").setValue(this.email);
+    this.formGroup.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((v) => {
+      this.email = v.email;
+    });
+  }
+
+  async submitSuper() {
+    await super.submit();
+  }
+
+  submit = async () => {
+    this.email = this.formGroup.get("email").value;
+    await this.submitSuper();
+  };
 }
