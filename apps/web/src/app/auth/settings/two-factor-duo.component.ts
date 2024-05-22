@@ -22,6 +22,8 @@ import { TwoFactorBaseComponent } from "./two-factor-base.component";
 export class TwoFactorDuoComponent extends TwoFactorBaseComponent {
   @Output() onChangeStatus: EventEmitter<boolean> = new EventEmitter();
   type = TwoFactorProviderType.Duo;
+  clientId: string;
+  clientSecret: string;
   formPromise: Promise<TwoFactorDuoResponse>;
   formGroup = this.formBuilder.group({
     ikey: ["", [Validators.required]],
@@ -95,8 +97,8 @@ export class TwoFactorDuoComponent extends TwoFactorBaseComponent {
 
   protected async enable() {
     const request = await this.buildRequestModel(UpdateTwoFactorDuoRequest);
-    request.integrationKey = this.ikey;
-    request.secretKey = this.skey;
+    request.integrationKey = this.clientId;
+    request.secretKey = this.clientSecret;
     request.host = this.host;
 
     return super.enable(async () => {
@@ -116,8 +118,8 @@ export class TwoFactorDuoComponent extends TwoFactorBaseComponent {
     this.dialogRef.close(this.enabled);
   };
   private processResponse(response: TwoFactorDuoResponse) {
-    this.ikey = response.integrationKey;
-    this.skey = response.secretKey;
+    this.clientId = response.integrationKey;
+    this.clientSecret = response.secretKey;
     this.host = response.host;
     this.enabled = response.enabled;
   }
