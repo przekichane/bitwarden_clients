@@ -196,8 +196,8 @@ export class TwoFactorSetupComponent implements OnInit, OnDestroy {
           this.dialogService,
           { data: result },
         );
-        webAuthnComp.componentInstance.onChangeStatus.subscribe((enabled: any) => {
-          this.updateStatus(enabled, TwoFactorProviderType.Authenticator);
+        webAuthnComp.componentInstance.onChangeStatus.subscribe((enabled: boolean) => {
+          this.updateStatus(enabled, TwoFactorProviderType.WebAuthn);
         });
         break;
       }

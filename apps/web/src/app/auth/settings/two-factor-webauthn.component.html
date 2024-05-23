@@ -19,16 +19,16 @@
           <li>{{ "twoFactorWebAuthnSupportWeb" | i18n }}</li>
         </ul>
       </app-callout>
-      <img class="tw-float-right tw-ml-5 mfaType7" alt="FIDO2 WebAuthn logo'" />
+      <img class="tw-float-right tw-ml-5 mfaType7" alt="FIDO2 WebAuthn logo" />
       <ul class="bwi-ul">
         <li *ngFor="let k of keys; let i = index" #removeKeyBtn [appApiAction]="k.removePromise">
           <i class="bwi bwi-li bwi-key"></i>
-          <p *ngIf="!k.configured || !k.name" bitTypography="body1" class="tw-font-bold">
+          <span *ngIf="!k.configured || !k.name" bitTypography="body1" class="tw-font-bold">
             {{ "webAuthnkeyX" | i18n: i + 1 }}
-          </p>
-          <p *ngIf="k.configured && k.name" bitTypography="body1" class="tw-font-bold">
+          </span>
+          <span *ngIf="k.configured && k.name" bitTypography="body1" class="tw-font-bold">
             {{ k.name }}
-          </p>
+          </span>
           <ng-container *ngIf="k.configured && !$any(removeKeyBtn).loading">
             <ng-container *ngIf="k.migrated">
               <span>{{ "webAuthnMigrated" | i18n }}</span>
@@ -36,7 +36,7 @@
           </ng-container>
           <ng-container *ngIf="keysConfiguredCount > 1 && k.configured">
             <i
-              class="bwi bwi-spin bwi-spinner text-muted bwi-fw"
+              class="bwi bwi-spin bwi-spinner tw-text-muted bwi-fw"
               title="{{ 'loading' | i18n }}"
               *ngIf="$any(removeKeyBtn).loading"
               aria-hidden="true"
@@ -54,7 +54,7 @@
         <li>{{ "twoFactorU2fTouchButton" | i18n }}</li>
         <li>{{ "twoFactorU2fSaveForm" | i18n }}</li>
       </ol>
-      <div class="tw-flex tw-flex-row">
+      <div class="tw-flex">
         <bit-form-field class="tw-basis-1/2">
           <bit-label>{{ "name" | i18n }}</bit-label>
           <input bitInput type="text" formControlName="name" />
@@ -62,7 +62,7 @@
       </div>
       <button
         bitButton
-        bitFornButton
+        bitFormButton
         type="button"
         [bitAction]="readKey"
         buttonType="secondary"
@@ -100,7 +100,6 @@
         {{ "save" | i18n }}
       </button>
       <button
-        #disableBtn
         bitButton
         bitFormButton
         *ngIf="enabled"

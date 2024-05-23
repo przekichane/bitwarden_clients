@@ -1,4 +1,4 @@
-import { DIALOG_DATA, DialogConfig, DialogRef } from "@angular/cdk/dialog";
+import { DIALOG_DATA, DialogConfig } from "@angular/cdk/dialog";
 import { Component, EventEmitter, Inject, NgZone, Output } from "@angular/core";
 import { FormControl, FormGroup } from "@angular/forms";
 
@@ -53,7 +53,6 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
 
   constructor(
     @Inject(DIALOG_DATA) protected data: AuthResponse<TwoFactorWebAuthnResponse>,
-    private dialogRef: DialogRef,
     apiService: ApiService,
     i18nService: I18nService,
     platformUtilsService: PlatformUtilsService,
