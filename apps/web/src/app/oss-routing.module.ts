@@ -7,9 +7,10 @@ import {
   redirectGuard,
   tdeDecryptionRequiredGuard,
   UnauthGuard,
+  unauthGuardFn,
 } from "@bitwarden/angular/auth/guards";
+import { AnonLayoutWrapperComponent } from "@bitwarden/auth/angular";
 
-import { AnonLayoutWrapperComponent } from "../../../../libs/auth/src/angular/anon-layout/anon-layout-wrapper.component";
 import { flagEnabled, Flags } from "../utils/flags";
 
 import { AcceptFamilySponsorshipComponent } from "./admin-console/organizations/sponsorships/accept-family-sponsorship.component";
@@ -297,7 +298,7 @@ const routes: Routes = [
       {
         path: "hint",
         component: HintComponent,
-        canActivate: [UnauthGuard],
+        canActivate: [unauthGuardFn()],
         data: {
           pageTitle: "passwordHint",
           titleId: "passwordHint",
