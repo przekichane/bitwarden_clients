@@ -11,8 +11,9 @@
     "output": "dist",
     "app": "build"
   },
+  "beforePack": "scripts/before-pack.js",
   "afterSign": "scripts/after-sign.js",
-  "asarUnpack": ["**/*.node"],
+  "asarUnpack": ["**/*.node", "**/bw-coredump-wrapper.sh"],
   "files": [
     "**/*",
     "!**/node_modules/@bitwarden/desktop-native/**/*",
@@ -22,7 +23,9 @@
     "!**/node_modules/argon2/**/*",
     "**/node_modules/argon2/argon2.js",
     "**/node_modules/argon2/package.json",
-    "**/node_modules/argon2/lib/binding/napi-v3/argon2.node"
+    "**/node_modules/argon2/lib/binding/napi-v3/argon2.node",
+
+    "resources/bw-coredump-wrapper.sh"
   ],
   "electronVersion": "28.3.1",
   "generateUpdatesFilesForAllChannels": true,
