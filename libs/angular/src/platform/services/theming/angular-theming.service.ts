@@ -31,6 +31,17 @@ export class AngularThemingService implements AbstractThemingService {
     );
   }
 
+  /**
+   * Gets the currently active system theme based on the given window.
+   * @param window The window to query for the current theme.
+   * @returns The active system theme.
+   */
+  static getSystemThemeFromWindow(window: Window): ThemeType {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? ThemeType.Dark
+      : ThemeType.Light;
+  }
+
   readonly theme$ = this.themeStateService.selectedTheme$.pipe(
     switchMap((configuredTheme) => {
       if (configuredTheme === ThemeType.System) {
