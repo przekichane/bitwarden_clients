@@ -8297,5 +8297,8 @@
   },
   "allLoginRequestsApproved": {
     "message": "All login requests approved"
+  },
+  "viewSecret": {
+    "message": "View secret"
   }
 }
