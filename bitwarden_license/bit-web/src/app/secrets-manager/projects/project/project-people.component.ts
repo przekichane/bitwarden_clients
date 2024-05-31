@@ -11,7 +11,7 @@ import { DialogService } from "@bitwarden/components";
 import { AccessPolicySelectorService } from "../../shared/access-policies/access-policy-selector/access-policy-selector.service";
 import {
   ApItemValueType,
-  convertToProjectPeopleAccessPoliciesView,
+  convertToPeopleAccessPoliciesView,
 } from "../../shared/access-policies/access-policy-selector/models/ap-item-value.type";
 import {
   ApItemViewType,
@@ -116,7 +116,7 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const projectPeopleView = convertToProjectPeopleAccessPoliciesView(formValues);
+      const projectPeopleView = convertToPeopleAccessPoliciesView(formValues);
       const peoplePoliciesViews = await this.accessPolicyService.putProjectPeopleAccessPolicies(
         this.projectId,
         projectPeopleView,

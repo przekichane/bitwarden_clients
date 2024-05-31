@@ -4,14 +4,12 @@ import {
   ServiceAccountAccessPolicyView,
   GrantedProjectAccessPolicyView,
 } from "../../../../models/view/access-policies/access-policy.view";
-import { ProjectPeopleAccessPoliciesView } from "../../../../models/view/access-policies/project-people-access-policies.view";
 import { ProjectServiceAccountsAccessPoliciesView } from "../../../../models/view/access-policies/project-service-accounts-access-policies.view";
 import { SecretAccessPoliciesView } from "../../../../models/view/access-policies/secret-access-policies.view";
 import {
   ServiceAccountGrantedPoliciesView,
   GrantedProjectPolicyPermissionDetailsView,
 } from "../../../../models/view/access-policies/service-account-granted-policies.view";
-import { ServiceAccountPeopleAccessPoliciesView } from "../../../../models/view/access-policies/service-account-people-access-policies.view";
 
 import { ApItemEnum } from "./enums/ap-item.enum";
 import { ApPermissionEnum, ApPermissionEnumUtil } from "./enums/ap-permission.enum";
@@ -24,22 +22,11 @@ export type ApItemValueType = {
   currentUser?: boolean;
 };
 
-export function convertToProjectPeopleAccessPoliciesView(
-  selectedPolicyValues: ApItemValueType[],
-): ProjectPeopleAccessPoliciesView {
-  const view = new ProjectPeopleAccessPoliciesView();
-  view.userAccessPolicies = convertToUserAccessPolicyViews(selectedPolicyValues);
-  view.groupAccessPolicies = convertToGroupAccessPolicyViews(selectedPolicyValues);
-  return view;
-}
-
-export function convertToServiceAccountPeopleAccessPoliciesView(
-  selectedPolicyValues: ApItemValueType[],
-): ServiceAccountPeopleAccessPoliciesView {
-  const view = new ServiceAccountPeopleAccessPoliciesView();
-  view.userAccessPolicies = convertToUserAccessPolicyViews(selectedPolicyValues);
-  view.groupAccessPolicies = convertToGroupAccessPolicyViews(selectedPolicyValues);
-  return view;
+export function convertToPeopleAccessPoliciesView(selectedPolicyValues: ApItemValueType[]) {
+  return {
+    userAccessPolicies: convertToUserAccessPolicyViews(selectedPolicyValues),
+    groupAccessPolicies: convertToGroupAccessPolicyViews(selectedPolicyValues),
+  };
 }
 
 export function convertToServiceAccountGrantedPoliciesView(
@@ -66,21 +53,19 @@ export function convertToServiceAccountGrantedPoliciesView(
 export function convertToProjectServiceAccountsAccessPoliciesView(
   selectedPolicyValues: ApItemValueType[],
 ): ProjectServiceAccountsAccessPoliciesView {
-  const view = new ProjectServiceAccountsAccessPoliciesView();
-  view.serviceAccountAccessPolicies =
-    convertToServiceAccountAccessPolicyViews(selectedPolicyValues);
-  return view;
+  return {
+    serviceAccountAccessPolicies: convertToServiceAccountAccessPolicyViews(selectedPolicyValues),
+  };
 }
 
 export function convertToSecretAccessPoliciesView(
   selectedPolicyValues: ApItemValueType[],
 ): SecretAccessPoliciesView {
-  const view = new SecretAccessPoliciesView();
-  view.userAccessPolicies = convertToUserAccessPolicyViews(selectedPolicyValues);
-  view.groupAccessPolicies = convertToGroupAccessPolicyViews(selectedPolicyValues);
-  view.serviceAccountAccessPolicies =
-    convertToServiceAccountAccessPolicyViews(selectedPolicyValues);
-  return view;
+  return {
+    userAccessPolicies: convertToUserAccessPolicyViews(selectedPolicyValues),
+    groupAccessPolicies: convertToGroupAccessPolicyViews(selectedPolicyValues),
+    serviceAccountAccessPolicies: convertToServiceAccountAccessPolicyViews(selectedPolicyValues),
+  };
 }
 
 function convertToUserAccessPolicyViews(apItemValues: ApItemValueType[]): UserAccessPolicyView[] {
