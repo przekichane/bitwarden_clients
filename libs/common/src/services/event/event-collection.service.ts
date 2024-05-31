@@ -36,7 +36,7 @@ export class EventCollectionService implements EventCollectionServiceAbstraction
     const userId = await firstValueFrom(this.stateProvider.activeUserId$);
     const eventStore = this.stateProvider.getUser(userId, EVENT_COLLECTION);
 
-    if (!(await this.shouldUpdate(null, ciphers, null, eventType))) {
+    if (!(await this.shouldUpdate(null, eventType, ciphers))) {
       return;
     }
 
@@ -85,7 +85,7 @@ export class EventCollectionService implements EventCollectionServiceAbstraction
     const userId = await firstValueFrom(this.stateProvider.activeUserId$);
     const eventStore = this.stateProvider.getUser(userId, EVENT_COLLECTION);
 
-    if (!(await this.shouldUpdate(cipherId, null, organizationId, eventType))) {
+    if (!(await this.shouldUpdate(organizationId, eventType, undefined, cipherId))) {
       return;
     }
 
@@ -111,10 +111,10 @@ export class EventCollectionService implements EventCollectionServiceAbstraction
    *  @param organizationId the organization for the event
    */
   private async shouldUpdate(
-    cipherId: string = null,
-    ciphers: CipherView[] = [],
     organizationId: string = null,
     eventType: EventType = null,
+    ciphers: CipherView[] = [],
+    cipherId?: string,
   ): Promise<boolean> {
     const cipher$ = from(this.cipherService.get(cipherId));
 
