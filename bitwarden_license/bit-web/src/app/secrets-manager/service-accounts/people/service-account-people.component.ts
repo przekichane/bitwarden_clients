@@ -180,10 +180,8 @@ export class ServiceAccountPeopleComponent implements OnInit, OnDestroy {
     serviceAccountId: string,
     selectedPolicies: ApItemValueType[],
   ) {
-    const serviceAccountPeopleView = convertToServiceAccountPeopleAccessPoliciesView(
-      serviceAccountId,
-      selectedPolicies,
-    );
+    const serviceAccountPeopleView =
+      convertToServiceAccountPeopleAccessPoliciesView(selectedPolicies);
     return await this.accessPolicyService.putServiceAccountPeopleAccessPolicies(
       serviceAccountId,
       serviceAccountPeopleView,

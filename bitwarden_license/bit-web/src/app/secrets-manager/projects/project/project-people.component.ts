@@ -116,10 +116,7 @@ export class ProjectPeopleComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const projectPeopleView = convertToProjectPeopleAccessPoliciesView(
-        this.projectId,
-        formValues,
-      );
+      const projectPeopleView = convertToProjectPeopleAccessPoliciesView(formValues);
       const peoplePoliciesViews = await this.accessPolicyService.putProjectPeopleAccessPolicies(
         this.projectId,
         projectPeopleView,
