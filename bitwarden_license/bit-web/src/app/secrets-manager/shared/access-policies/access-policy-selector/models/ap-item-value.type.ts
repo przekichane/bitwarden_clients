@@ -6,6 +6,7 @@ import {
 } from "../../../../models/view/access-policies/access-policy.view";
 import { ProjectPeopleAccessPoliciesView } from "../../../../models/view/access-policies/project-people-access-policies.view";
 import { ProjectServiceAccountsAccessPoliciesView } from "../../../../models/view/access-policies/project-service-accounts-access-policies.view";
+import { SecretAccessPoliciesView } from "../../../../models/view/access-policies/secret-access-policies.view";
 import {
   ServiceAccountGrantedPoliciesView,
   GrantedProjectPolicyPermissionDetailsView,
@@ -27,17 +28,8 @@ export function convertToProjectPeopleAccessPoliciesView(
   selectedPolicyValues: ApItemValueType[],
 ): ProjectPeopleAccessPoliciesView {
   const view = new ProjectPeopleAccessPoliciesView();
-  view.userAccessPolicies = selectedPolicyValues
-    .filter((x) => x.type == ApItemEnum.User)
-    .map((filtered) => {
-      return convertToUserAccessPolicyView(filtered);
-    });
-
-  view.groupAccessPolicies = selectedPolicyValues
-    .filter((x) => x.type == ApItemEnum.Group)
-    .map((filtered) => {
-      return convertToGroupAccessPolicyView(filtered);
-    });
+  view.userAccessPolicies = convertToUserAccessPolicyViews(selectedPolicyValues);
+  view.groupAccessPolicies = convertToGroupAccessPolicyViews(selectedPolicyValues);
   return view;
 }
 
@@ -45,17 +37,8 @@ export function convertToServiceAccountPeopleAccessPoliciesView(
   selectedPolicyValues: ApItemValueType[],
 ): ServiceAccountPeopleAccessPoliciesView {
   const view = new ServiceAccountPeopleAccessPoliciesView();
-  view.userAccessPolicies = selectedPolicyValues
-    .filter((x) => x.type == ApItemEnum.User)
-    .map((filtered) => {
-      return convertToUserAccessPolicyView(filtered);
-    });
-
-  view.groupAccessPolicies = selectedPolicyValues
-    .filter((x) => x.type == ApItemEnum.Group)
-    .map((filtered) => {
-      return convertToGroupAccessPolicyView(filtered);
-    });
+  view.userAccessPolicies = convertToUserAccessPolicyViews(selectedPolicyValues);
+  view.groupAccessPolicies = convertToGroupAccessPolicyViews(selectedPolicyValues);
   return view;
 }
 
@@ -84,38 +67,56 @@ export function convertToProjectServiceAccountsAccessPoliciesView(
   selectedPolicyValues: ApItemValueType[],
 ): ProjectServiceAccountsAccessPoliciesView {
   const view = new ProjectServiceAccountsAccessPoliciesView();
-
-  view.serviceAccountAccessPolicies = selectedPolicyValues
-    .filter((x) => x.type == ApItemEnum.ServiceAccount)
-    .map((filtered) => {
-      return convertToServiceAccountAccessPolicyView(filtered);
-    });
-
+  view.serviceAccountAccessPolicies =
+    convertToServiceAccountAccessPolicyViews(selectedPolicyValues);
   return view;
 }
 
-function convertToUserAccessPolicyView(apItem: ApItemValueType): UserAccessPolicyView {
-  const policyView = new UserAccessPolicyView();
-  policyView.organizationUserId = apItem.id;
-  policyView.read = ApPermissionEnumUtil.toRead(apItem.permission);
-  policyView.write = ApPermissionEnumUtil.toWrite(apItem.permission);
-  return policyView;
+export function convertToSecretAccessPoliciesView(
+  selectedPolicyValues: ApItemValueType[],
+): SecretAccessPoliciesView {
+  const view = new SecretAccessPoliciesView();
+  view.userAccessPolicies = convertToUserAccessPolicyViews(selectedPolicyValues);
+  view.groupAccessPolicies = convertToGroupAccessPolicyViews(selectedPolicyValues);
+  view.serviceAccountAccessPolicies =
+    convertToServiceAccountAccessPolicyViews(selectedPolicyValues);
+  return view;
 }
 
-function convertToGroupAccessPolicyView(apItem: ApItemValueType): GroupAccessPolicyView {
-  const policyView = new GroupAccessPolicyView();
-  policyView.groupId = apItem.id;
-  policyView.read = ApPermissionEnumUtil.toRead(apItem.permission);
-  policyView.write = ApPermissionEnumUtil.toWrite(apItem.permission);
-  return policyView;
+function convertToUserAccessPolicyViews(apItemValues: ApItemValueType[]): UserAccessPolicyView[] {
+  return apItemValues
+    .filter((x) => x.type == ApItemEnum.User)
+    .map((filtered) => {
+      const policyView = new UserAccessPolicyView();
+      policyView.organizationUserId = filtered.id;
+      policyView.read = ApPermissionEnumUtil.toRead(filtered.permission);
+      policyView.write = ApPermissionEnumUtil.toWrite(filtered.permission);
+      return policyView;
+    });
 }
 
-function convertToServiceAccountAccessPolicyView(
-  apItem: ApItemValueType,
-): ServiceAccountAccessPolicyView {
-  const policyView = new ServiceAccountAccessPolicyView();
-  policyView.serviceAccountId = apItem.id;
-  policyView.read = ApPermissionEnumUtil.toRead(apItem.permission);
-  policyView.write = ApPermissionEnumUtil.toWrite(apItem.permission);
-  return policyView;
+function convertToGroupAccessPolicyViews(apItemValues: ApItemValueType[]): GroupAccessPolicyView[] {
+  return apItemValues
+    .filter((x) => x.type == ApItemEnum.Group)
+    .map((filtered) => {
+      const policyView = new GroupAccessPolicyView();
+      policyView.groupId = filtered.id;
+      policyView.read = ApPermissionEnumUtil.toRead(filtered.permission);
+      policyView.write = ApPermissionEnumUtil.toWrite(filtered.permission);
+      return policyView;
+    });
+}
+
+function convertToServiceAccountAccessPolicyViews(
+  apItemValues: ApItemValueType[],
+): ServiceAccountAccessPolicyView[] {
+  return apItemValues
+    .filter((x) => x.type == ApItemEnum.ServiceAccount)
+    .map((filtered) => {
+      const policyView = new ServiceAccountAccessPolicyView();
+      policyView.serviceAccountId = filtered.id;
+      policyView.read = ApPermissionEnumUtil.toRead(filtered.permission);
+      policyView.write = ApPermissionEnumUtil.toWrite(filtered.permission);
+      return policyView;
+    });
 }
