@@ -5,8 +5,7 @@ import {
   GroupAccessPolicyView,
   ServiceAccountAccessPolicyView,
   UserAccessPolicyView,
-} from "src/app/secrets-manager/models/view/access-policies/access-policy.view";
-
+} from "../../../../models/view/access-policies/access-policy.view";
 import { PotentialGranteeView } from "../../../../models/view/access-policies/potential-grantee.view";
 import { ProjectPeopleAccessPoliciesView } from "../../../../models/view/access-policies/project-people-access-policies.view";
 import { ProjectServiceAccountsAccessPoliciesView } from "../../../../models/view/access-policies/project-service-accounts-access-policies.view";
