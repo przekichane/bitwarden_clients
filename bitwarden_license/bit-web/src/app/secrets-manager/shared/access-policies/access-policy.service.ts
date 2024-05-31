@@ -307,22 +307,6 @@ export class AccessPolicyService {
     };
   }
 
-  private async createServiceAccountAccessPolicyView(
-    organizationKey: SymmetricCryptoKey,
-    response: ServiceAccountAccessPolicyResponse,
-  ): Promise<ServiceAccountAccessPolicyView> {
-    return {
-      ...this.createBaseAccessPolicyView(response),
-      serviceAccountId: response.serviceAccountId,
-      serviceAccountName: response.serviceAccountName
-        ? await this.encryptService.decryptToUtf8(
-            new EncString(response.serviceAccountName),
-            organizationKey,
-          )
-        : null,
-    };
-  }
-
   private async createGrantedProjectAccessPolicyView(
     organizationKey: SymmetricCryptoKey,
     response: GrantedProjectAccessPolicyResponse,
@@ -370,8 +354,17 @@ export class AccessPolicyService {
     responses: ServiceAccountAccessPolicyResponse[],
   ): Promise<ServiceAccountAccessPolicyView[]> {
     return await Promise.all(
-      responses.map(async (ap) => {
-        return await this.createServiceAccountAccessPolicyView(orgKey, ap);
+      responses.map(async (response) => {
+        return {
+          ...this.createBaseAccessPolicyView(response),
+          serviceAccountId: response.serviceAccountId,
+          serviceAccountName: response.serviceAccountName
+            ? await this.encryptService.decryptToUtf8(
+                new EncString(response.serviceAccountName),
+                orgKey,
+              )
+            : null,
+        };
       }),
     );
   }
