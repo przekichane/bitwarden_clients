@@ -24,8 +24,7 @@ const common = {
           {
             loader: "babel-loader",
             options: {
-              configFile: false,
-              plugins: ["@angular/compiler-cli/linker/babel"],
+              configFile: "../../babel.config.json",
             },
           },
         ],
@@ -177,6 +176,7 @@ const renderer = {
       ENV: ENV,
       FLAGS: envConfig.flags,
       DEV_FLAGS: NODE_ENV === "development" ? envConfig.devFlags : {},
+      ADDITIONAL_REGIONS: envConfig.additionalRegions ?? [],
     }),
   ],
 };

@@ -1,6 +1,8 @@
-import { mock, mockReset } from "jest-mock-extended";
-import { of } from "rxjs";
+import { mock, mockReset, MockProxy } from "jest-mock-extended";
+import { BehaviorSubject, of } from "rxjs";
 
+import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
 import { UserVerificationService } from "@bitwarden/common/auth/services/user-verification/user-verification.service";
 import { AutofillOverlayVisibility } from "@bitwarden/common/autofill/constants";
 import { AutofillSettingsService } from "@bitwarden/common/autofill/services/autofill-settings.service";
@@ -8,9 +10,12 @@ import {
   DefaultDomainSettingsService,
   DomainSettingsService,
 } from "@bitwarden/common/autofill/services/domain-settings.service";
+import { InlineMenuVisibilitySetting } from "@bitwarden/common/autofill/types";
+import { BillingAccountProfileStateService } from "@bitwarden/common/billing/abstractions/account/billing-account-profile-state.service";
 import { EventType } from "@bitwarden/common/enums";
 import { UriMatchStrategy } from "@bitwarden/common/models/domain/domain-service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import { EventCollectionService } from "@bitwarden/common/services/event/event-collection.service";
 import {
@@ -31,7 +36,7 @@ import { CipherService } from "@bitwarden/common/vault/services/cipher.service";
 import { TotpService } from "@bitwarden/common/vault/services/totp.service";
 
 import { BrowserApi } from "../../platform/browser/browser-api";
-import { BrowserStateService } from "../../platform/services/browser-state.service";
+import { BrowserScriptInjectorService } from "../../platform/services/browser-script-injector.service";
 import { AutofillPort } from "../enums/autofill-port.enums";
 import AutofillField from "../models/autofill-field";
 import AutofillPageDetails from "../models/autofill-page-details";
@@ -43,7 +48,7 @@ import {
   createChromeTabMock,
   createGenerateFillScriptOptionsMock,
 } from "../spec/autofill-mocks";
-import { triggerTestFailure } from "../spec/testing-utils";
+import { flushPromises, triggerTestFailure } from "../spec/testing-utils";
 
 import {
   AutoFillOptions,
@@ -62,27 +67,42 @@ const mockEquivalentDomains = [
 describe("AutofillService", () => {
   let autofillService: AutofillService;
   const cipherService = mock<CipherService>();
-  const stateService = mock<BrowserStateService>();
-  const autofillSettingsService = mock<AutofillSettingsService>();
+  let inlineMenuVisibilityMock$!: BehaviorSubject<InlineMenuVisibilitySetting>;
+  let autofillSettingsService: MockProxy<AutofillSettingsService>;
   const mockUserId = Utils.newGuid() as UserId;
   const accountService: FakeAccountService = mockAccountServiceWith(mockUserId);
   const fakeStateProvider: FakeStateProvider = new FakeStateProvider(accountService);
   let domainSettingsService: DomainSettingsService;
+  let scriptInjectorService: BrowserScriptInjectorService;
   const totpService = mock<TotpService>();
   const eventCollectionService = mock<EventCollectionService>();
   const logService = mock<LogService>();
   const userVerificationService = mock<UserVerificationService>();
+  const billingAccountProfileStateService = mock<BillingAccountProfileStateService>();
+  const platformUtilsService = mock<PlatformUtilsService>();
+  let activeAccountStatusMock$: BehaviorSubject<AuthenticationStatus>;
+  let authService: MockProxy<AuthService>;
 
   beforeEach(() => {
+    scriptInjectorService = new BrowserScriptInjectorService(platformUtilsService, logService);
+    inlineMenuVisibilityMock$ = new BehaviorSubject(AutofillOverlayVisibility.OnFieldFocus);
+    autofillSettingsService = mock<AutofillSettingsService>();
+    (autofillSettingsService as any).inlineMenuVisibility$ = inlineMenuVisibilityMock$;
+    activeAccountStatusMock$ = new BehaviorSubject(AuthenticationStatus.Unlocked);
+    authService = mock<AuthService>();
+    authService.activeAccountStatus$ = activeAccountStatusMock$;
     autofillService = new AutofillService(
       cipherService,
-      stateService,
       autofillSettingsService,
       totpService,
       eventCollectionService,
       logService,
       domainSettingsService,
       userVerificationService,
+      billingAccountProfileStateService,
+      scriptInjectorService,
+      accountService,
+      authService,
     );
 
     domainSettingsService = new DefaultDomainSettingsService(fakeStateProvider);
@@ -135,17 +155,92 @@ describe("AutofillService", () => {
       // eslint-disable-next-line no-restricted-syntax
       expect(chrome.runtime.onConnect.addListener).toHaveBeenCalledWith(expect.any(Function));
     });
+
+    describe("handle inline menu visibility change", () => {
+      beforeEach(async () => {
+        await autofillService.loadAutofillScriptsOnInstall();
+        jest.spyOn(BrowserApi, "tabsQuery").mockResolvedValue([tab1, tab2]);
+        jest.spyOn(BrowserApi, "tabSendMessageData").mockImplementation();
+        jest.spyOn(autofillService, "reloadAutofillScripts").mockImplementation();
+      });
+
+      it("returns early if the setting is being initialized", async () => {
+        await flushPromises();
+
+        expect(BrowserApi.tabsQuery).toHaveBeenCalledTimes(1);
+        expect(BrowserApi.tabSendMessageData).not.toHaveBeenCalled();
+      });
+
+      it("returns early if the previous setting is equivalent to the new setting", async () => {
+        inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnFieldFocus);
+        await flushPromises();
+
+        expect(BrowserApi.tabsQuery).toHaveBeenCalledTimes(1);
+        expect(BrowserApi.tabSendMessageData).not.toHaveBeenCalled();
+      });
+
+      describe("updates the inline menu visibility setting", () => {
+        it("when changing the inline menu from on focus of field to on button click", async () => {
+          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnButtonClick);
+          await flushPromises();
+
+          expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(
+            tab1,
+            "updateAutofillOverlayVisibility",
+            { autofillOverlayVisibility: AutofillOverlayVisibility.OnButtonClick },
+          );
+          expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(
+            tab2,
+            "updateAutofillOverlayVisibility",
+            { autofillOverlayVisibility: AutofillOverlayVisibility.OnButtonClick },
+          );
+        });
+
+        it("when changing the inline menu from button click to field focus", async () => {
+          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnButtonClick);
+          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnFieldFocus);
+          await flushPromises();
+
+          expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(
+            tab1,
+            "updateAutofillOverlayVisibility",
+            { autofillOverlayVisibility: AutofillOverlayVisibility.OnFieldFocus },
+          );
+          expect(BrowserApi.tabSendMessageData).toHaveBeenCalledWith(
+            tab2,
+            "updateAutofillOverlayVisibility",
+            { autofillOverlayVisibility: AutofillOverlayVisibility.OnFieldFocus },
+          );
+        });
+      });
+
+      describe("reloads the autofill scripts", () => {
+        it("when changing the inline menu from a disabled setting to an enabled setting", async () => {
+          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.Off);
+          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnFieldFocus);
+          await flushPromises();
+
+          expect(autofillService.reloadAutofillScripts).toHaveBeenCalled();
+        });
+
+        it("when changing the inline menu from a enabled setting to a disabled setting", async () => {
+          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.OnFieldFocus);
+          inlineMenuVisibilityMock$.next(AutofillOverlayVisibility.Off);
+          await flushPromises();
+
+          expect(autofillService.reloadAutofillScripts).toHaveBeenCalled();
+        });
+      });
+    });
   });
 
   describe("reloadAutofillScripts", () => {
-    it("disconnects and removes all autofill script ports", () => {
-      const port1 = mock<chrome.runtime.Port>({
-        disconnect: jest.fn(),
-      });
-      const port2 = mock<chrome.runtime.Port>({
-        disconnect: jest.fn(),
-      });
+    it("re-injects the autofill scripts in all tabs and disconnects all connected ports", () => {
+      const port1 = mock<chrome.runtime.Port>();
+      const port2 = mock<chrome.runtime.Port>();
       autofillService["autofillScriptPortsSet"] = new Set([port1, port2]);
+      jest.spyOn(autofillService as any, "injectAutofillScriptsInAllTabs");
+      jest.spyOn(autofillService, "getAutofillOnPageLoad").mockResolvedValue(true);
 
       // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -154,17 +249,6 @@ describe("AutofillService", () => {
       expect(port1.disconnect).toHaveBeenCalled();
       expect(port2.disconnect).toHaveBeenCalled();
       expect(autofillService["autofillScriptPortsSet"].size).toBe(0);
-    });
-
-    it("re-injects the autofill scripts in all tabs", () => {
-      autofillService["autofillScriptPortsSet"] = new Set([mock<chrome.runtime.Port>()]);
-      jest.spyOn(autofillService as any, "injectAutofillScriptsInAllTabs");
-      jest.spyOn(autofillService, "getAutofillOnPageLoad").mockResolvedValue(true);
-
-      // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-      // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      autofillService.reloadAutofillScripts();
-
       expect(autofillService["injectAutofillScriptsInAllTabs"]).toHaveBeenCalled();
     });
   });
@@ -201,6 +285,18 @@ describe("AutofillService", () => {
 
     it("skips injecting autofiller script when autofill on load setting is disabled", async () => {
       jest.spyOn(autofillService, "getAutofillOnPageLoad").mockResolvedValue(false);
+
+      await autofillService.injectAutofillScripts(sender.tab, sender.frameId, true);
+
+      expect(BrowserApi.executeScriptInTab).not.toHaveBeenCalledWith(tabMock.id, {
+        file: "content/autofiller.js",
+        frameId: sender.frameId,
+        ...defaultExecuteScriptOptions,
+      });
+    });
+
+    it("skips injecting the autofiller script when the user's account is not unlocked", async () => {
+      activeAccountStatusMock$.next(AuthenticationStatus.Locked);
 
       await autofillService.injectAutofillScripts(sender.tab, sender.frameId, true);
 
@@ -250,6 +346,7 @@ describe("AutofillService", () => {
 
       expect(BrowserApi.executeScriptInTab).toHaveBeenCalledWith(tabMock.id, {
         file: "content/content-message-handler.js",
+        frameId: 0,
         ...defaultExecuteScriptOptions,
       });
     });
@@ -476,6 +573,7 @@ describe("AutofillService", () => {
 
       it("throws an error if an autofill did not occur for any of the passed pages", async () => {
         autofillOptions.tab.url = "https://a-different-url.com";
+        billingAccountProfileStateService.hasPremiumFromAnySource$ = of(true);
 
         try {
           await autofillService.doAutoFill(autofillOptions);
@@ -487,7 +585,6 @@ describe("AutofillService", () => {
     });
 
     it("will autofill login data for a page", async () => {
-      jest.spyOn(stateService, "getCanAccessPremium");
       jest.spyOn(autofillService as any, "generateFillScript");
       jest.spyOn(autofillService as any, "generateLoginFillScript");
       jest.spyOn(logService, "info");
@@ -497,8 +594,6 @@ describe("AutofillService", () => {
       const autofillResult = await autofillService.doAutoFill(autofillOptions);
 
       const currentAutofillPageDetails = autofillOptions.pageDetails[0];
-      expect(stateService.getCanAccessPremium).toHaveBeenCalled();
-      expect(autofillService["getDefaultUriMatchStrategy"]).toHaveBeenCalled();
       expect(autofillService["generateFillScript"]).toHaveBeenCalledWith(
         currentAutofillPageDetails.details,
         {
@@ -660,7 +755,7 @@ describe("AutofillService", () => {
     it("returns a TOTP value", async () => {
       const totpCode = "123456";
       autofillOptions.cipher.login.totp = "totp";
-      jest.spyOn(stateService, "getCanAccessPremium").mockResolvedValue(true);
+      billingAccountProfileStateService.hasPremiumFromAnySource$ = of(true);
       jest.spyOn(autofillService, "getShouldAutoCopyTotp").mockResolvedValue(true);
       jest.spyOn(totpService, "getCode").mockResolvedValue(totpCode);
 
@@ -673,7 +768,7 @@ describe("AutofillService", () => {
 
     it("does not return a TOTP value if the user does not have premium features", async () => {
       autofillOptions.cipher.login.totp = "totp";
-      jest.spyOn(stateService, "getCanAccessPremium").mockResolvedValue(false);
+      billingAccountProfileStateService.hasPremiumFromAnySource$ = of(false);
       jest.spyOn(autofillService, "getShouldAutoCopyTotp").mockResolvedValue(true);
 
       const autofillResult = await autofillService.doAutoFill(autofillOptions);
@@ -707,7 +802,7 @@ describe("AutofillService", () => {
     it("returns a null value if the user cannot access premium and the organization does not use TOTP", async () => {
       autofillOptions.cipher.login.totp = "totp";
       autofillOptions.cipher.organizationUseTotp = false;
-      jest.spyOn(stateService, "getCanAccessPremium").mockResolvedValueOnce(false);
+      billingAccountProfileStateService.hasPremiumFromAnySource$ = of(false);
 
       const autofillResult = await autofillService.doAutoFill(autofillOptions);
 
@@ -717,13 +812,12 @@ describe("AutofillService", () => {
     it("returns a null value if the user has disabled `auto TOTP copy`", async () => {
       autofillOptions.cipher.login.totp = "totp";
       autofillOptions.cipher.organizationUseTotp = true;
-      jest.spyOn(stateService, "getCanAccessPremium").mockResolvedValue(true);
+      billingAccountProfileStateService.hasPremiumFromAnySource$ = of(true);
       jest.spyOn(autofillService, "getShouldAutoCopyTotp").mockResolvedValue(false);
       jest.spyOn(totpService, "getCode");
 
       const autofillResult = await autofillService.doAutoFill(autofillOptions);
 
-      expect(stateService.getCanAccessPremium).toHaveBeenCalled();
       expect(autofillService.getShouldAutoCopyTotp).toHaveBeenCalled();
       expect(totpService.getCode).not.toHaveBeenCalled();
       expect(autofillResult).toBeNull();

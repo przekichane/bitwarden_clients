@@ -1,4 +1,4 @@
-import { Component, HostListener, Optional } from "@angular/core";
+import { Component, HostListener, Input, Optional } from "@angular/core";
 import { BehaviorSubject, map } from "rxjs";
 
 import { NavBaseComponent } from "./nav-base.component";
@@ -11,6 +11,9 @@ import { SideNavService } from "./side-nav.service";
   providers: [{ provide: NavBaseComponent, useExisting: NavItemComponent }],
 })
 export class NavItemComponent extends NavBaseComponent {
+  /** Forces active styles to be shown, regardless of the `routerLinkActiveOptions` */
+  @Input() forceActiveStyles? = false;
+
   /**
    * Is `true` if `to` matches the current route
    */
@@ -22,7 +25,7 @@ export class NavItemComponent extends NavBaseComponent {
     }
   }
   protected get showActiveStyles() {
-    return this._isActive && !this.hideActiveStyles;
+    return this.forceActiveStyles || (this._isActive && !this.hideActiveStyles);
   }
 
   /**

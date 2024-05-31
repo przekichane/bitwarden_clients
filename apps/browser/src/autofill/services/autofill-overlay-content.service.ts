@@ -30,6 +30,10 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
   isOverlayCiphersPopulated = false;
   pageDetailsUpdateRequired = false;
   autofillOverlayVisibility: number;
+  private isFirefoxBrowser =
+    globalThis.navigator.userAgent.indexOf(" Firefox/") !== -1 ||
+    globalThis.navigator.userAgent.indexOf(" Gecko/") !== -1;
+  private readonly generateRandomCustomElementName = generateRandomCustomElementName;
   private readonly findTabs = tabbable;
   private readonly sendExtensionMessage = sendExtensionMessage;
   private formFieldElements: Set<ElementWithOpId<FormFieldElement>> = new Set([]);
@@ -82,7 +86,7 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
     formFieldElement: ElementWithOpId<FormFieldElement>,
     autofillFieldData: AutofillField,
   ) {
-    if (this.isIgnoredField(autofillFieldData)) {
+    if (this.isIgnoredField(autofillFieldData) || this.formFieldElements.has(formFieldElement)) {
       return;
     }
 
@@ -182,9 +186,7 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
 
     this.overlayButtonElement.remove();
     this.isOverlayButtonVisible = false;
-    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.sendExtensionMessage("autofillOverlayElementClosed", {
+    void this.sendExtensionMessage("autofillOverlayElementClosed", {
       overlayElement: AutofillOverlayElement.Button,
     });
     this.removeOverlayRepositionEventListeners();
@@ -200,9 +202,7 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
 
     this.overlayListElement.remove();
     this.isOverlayListVisible = false;
-    // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.sendExtensionMessage("autofillOverlayElementClosed", {
+    void this.sendExtensionMessage("autofillOverlayElementClosed", {
       overlayElement: AutofillOverlayElement.List,
     });
   }
@@ -593,6 +593,7 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
   private updateOverlayButtonPosition() {
     if (!this.overlayButtonElement) {
       this.createAutofillOverlayButton();
+      this.updateCustomElementDefaultStyles(this.overlayButtonElement);
     }
 
     if (!this.isOverlayButtonVisible) {
@@ -613,6 +614,7 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
   private updateOverlayListPosition() {
     if (!this.overlayListElement) {
       this.createAutofillOverlayList();
+      this.updateCustomElementDefaultStyles(this.overlayListElement);
     }
 
     if (!this.isOverlayListVisible) {
@@ -706,7 +708,7 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
   private async getBoundingClientRectFromIntersectionObserver(
     formFieldElement: ElementWithOpId<FormFieldElement>,
   ): Promise<DOMRectReadOnly | null> {
-    if (!("IntersectionObserver" in window) && !("IntersectionObserverEntry" in window)) {
+    if (!("IntersectionObserver" in globalThis) && !("IntersectionObserverEntry" in globalThis)) {
       return null;
     }
 
@@ -765,11 +767,24 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
       return;
     }
 
-    const customElementName = generateRandomCustomElementName();
-    globalThis.customElements?.define(customElementName, AutofillOverlayButtonIframe);
-    this.overlayButtonElement = globalThis.document.createElement(customElementName);
+    if (this.isFirefoxBrowser) {
+      this.overlayButtonElement = globalThis.document.createElement("div");
+      new AutofillOverlayButtonIframe(this.overlayButtonElement);
 
-    this.updateCustomElementDefaultStyles(this.overlayButtonElement);
+      return;
+    }
+
+    const customElementName = this.generateRandomCustomElementName();
+    globalThis.customElements?.define(
+      customElementName,
+      class extends HTMLElement {
+        constructor() {
+          super();
+          new AutofillOverlayButtonIframe(this);
+        }
+      },
+    );
+    this.overlayButtonElement = globalThis.document.createElement(customElementName);
   }
 
   /**
@@ -781,11 +796,24 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
       return;
     }
 
-    const customElementName = generateRandomCustomElementName();
-    globalThis.customElements?.define(customElementName, AutofillOverlayListIframe);
-    this.overlayListElement = globalThis.document.createElement(customElementName);
+    if (this.isFirefoxBrowser) {
+      this.overlayListElement = globalThis.document.createElement("div");
+      new AutofillOverlayListIframe(this.overlayListElement);
 
-    this.updateCustomElementDefaultStyles(this.overlayListElement);
+      return;
+    }
+
+    const customElementName = this.generateRandomCustomElementName();
+    globalThis.customElements?.define(
+      customElementName,
+      class extends HTMLElement {
+        constructor() {
+          super();
+          new AutofillOverlayListIframe(this);
+        }
+      },
+    );
+    this.overlayListElement = globalThis.document.createElement(customElementName);
   }
 
   /**
@@ -869,7 +897,7 @@ class AutofillOverlayContentService implements AutofillOverlayContentServiceInte
 
     if (
       this.focusedFieldData.focusedFieldRects?.top > 0 &&
-      this.focusedFieldData.focusedFieldRects?.top < window.innerHeight
+      this.focusedFieldData.focusedFieldRects?.top < globalThis.innerHeight
     ) {
       return;
     }

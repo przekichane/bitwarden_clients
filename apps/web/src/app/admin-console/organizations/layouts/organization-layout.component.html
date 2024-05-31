@@ -1,7 +1,7 @@
 <bit-layout>
   <bit-side-nav variant="secondary" *ngIf="organization$ | async as organization">
     <bit-nav-logo [openIcon]="logo" route="." [ariaLabel]="'adminConsole' | i18n"></bit-nav-logo>
-    <org-switcher [filter]="orgFilter"></org-switcher>
+    <org-switcher [filter]="orgFilter" [hideNewButton]="hideNewOrgButton$ | async"></org-switcher>
 
     <bit-nav-item
       icon="bwi-collection"
@@ -103,6 +103,9 @@
         *ngIf="organization.canManageScim"
       ></bit-nav-item>
     </bit-nav-group>
+
+    <navigation-product-switcher class="tw-mt-auto"></navigation-product-switcher>
+    <app-toggle-width></app-toggle-width>
   </bit-side-nav>
 
   <ng-container *ngIf="organization$ | async as organization">

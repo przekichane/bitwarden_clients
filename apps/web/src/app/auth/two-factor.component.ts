@@ -1,25 +1,34 @@
 import { Component, Inject, OnDestroy, ViewChild, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
+import { lastValueFrom } from "rxjs";
 
 import { TwoFactorComponent as BaseTwoFactorComponent } from "@bitwarden/angular/auth/components/two-factor.component";
 import { WINDOW } from "@bitwarden/angular/services/injection-tokens";
-import { ModalService } from "@bitwarden/angular/services/modal.service";
-import { LoginStrategyServiceAbstraction } from "@bitwarden/auth/common";
+import {
+  LoginStrategyServiceAbstraction,
+  LoginEmailServiceAbstraction,
+  UserDecryptionOptionsServiceAbstraction,
+} from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
-import { LoginService } from "@bitwarden/common/auth/abstractions/login.service";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
+import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
 import { SsoLoginServiceAbstraction } from "@bitwarden/common/auth/abstractions/sso-login.service.abstraction";
 import { TwoFactorService } from "@bitwarden/common/auth/abstractions/two-factor.service";
-import { TwoFactorProviderType } from "@bitwarden/common/auth/enums/two-factor-provider-type";
 import { AuthResult } from "@bitwarden/common/auth/models/domain/auth-result";
 import { AppIdService } from "@bitwarden/common/platform/abstractions/app-id.service";
-import { ConfigServiceAbstraction } from "@bitwarden/common/platform/abstractions/config/config.service.abstraction";
+import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { EnvironmentService } from "@bitwarden/common/platform/abstractions/environment.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
+import { DialogService } from "@bitwarden/components";
 
-import { TwoFactorOptionsComponent } from "./two-factor-options.component";
+import {
+  TwoFactorOptionsDialogResult,
+  TwoFactorOptionsComponent,
+  TwoFactorOptionsDialogResultType,
+} from "./two-factor-options.component";
 
 @Component({
   selector: "app-two-factor",
@@ -38,14 +47,17 @@ export class TwoFactorComponent extends BaseTwoFactorComponent implements OnDest
     platformUtilsService: PlatformUtilsService,
     stateService: StateService,
     environmentService: EnvironmentService,
-    private modalService: ModalService,
+    private dialogService: DialogService,
     route: ActivatedRoute,
     logService: LogService,
     twoFactorService: TwoFactorService,
     appIdService: AppIdService,
-    loginService: LoginService,
+    loginEmailService: LoginEmailServiceAbstraction,
+    userDecryptionOptionsService: UserDecryptionOptionsServiceAbstraction,
     ssoLoginService: SsoLoginServiceAbstraction,
-    configService: ConfigServiceAbstraction,
+    configService: ConfigService,
+    masterPasswordService: InternalMasterPasswordServiceAbstraction,
+    accountService: AccountService,
     @Inject(WINDOW) protected win: Window,
   ) {
     super(
@@ -61,30 +73,23 @@ export class TwoFactorComponent extends BaseTwoFactorComponent implements OnDest
       logService,
       twoFactorService,
       appIdService,
-      loginService,
+      loginEmailService,
+      userDecryptionOptionsService,
       ssoLoginService,
       configService,
+      masterPasswordService,
+      accountService,
     );
     this.onSuccessfulLoginNavigate = this.goAfterLogIn;
   }
 
   async anotherMethod() {
-    const [modal] = await this.modalService.openViewRef(
-      TwoFactorOptionsComponent,
-      this.twoFactorOptionsModal,
-      (comp) => {
-        // eslint-disable-next-line rxjs-angular/prefer-takeuntil, rxjs/no-async-subscribe
-        comp.onProviderSelected.subscribe(async (provider: TwoFactorProviderType) => {
-          modal.close();
-          this.selectedProviderType = provider;
-          await this.init();
-        });
-        // eslint-disable-next-line rxjs-angular/prefer-takeuntil
-        comp.onRecoverSelected.subscribe(() => {
-          modal.close();
-        });
-      },
-    );
+    const dialogRef = TwoFactorOptionsComponent.open(this.dialogService);
+    const response: TwoFactorOptionsDialogResultType = await lastValueFrom(dialogRef.closed);
+    if (response.result === TwoFactorOptionsDialogResult.Provider) {
+      this.selectedProviderType = response.type;
+      await this.init();
+    }
   }
 
   protected override handleMigrateEncryptionKey(result: AuthResult): boolean {
@@ -98,7 +103,7 @@ export class TwoFactorComponent extends BaseTwoFactorComponent implements OnDest
   }
 
   goAfterLogIn = async () => {
-    this.loginService.clearValues();
+    this.loginEmailService.clearValues();
     // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.router.navigate([this.successRoute], {
@@ -122,7 +127,7 @@ export class TwoFactorComponent extends BaseTwoFactorComponent implements OnDest
     await this.submit();
   };
 
-  override launchDuoFrameless() {
+  override async launchDuoFrameless() {
     const duoHandOffMessage = {
       title: this.i18nService.t("youSuccessfullyLoggedIn"),
       message: this.i18nService.t("thisWindowWillCloseIn5Seconds"),

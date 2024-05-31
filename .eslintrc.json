@@ -67,7 +67,7 @@
             "pathGroupsExcludedImportTypes": ["builtin"]
           }
         ],
-        "rxjs-angular/prefer-takeuntil": "error",
+        "rxjs-angular/prefer-takeuntil": ["error", { "alias": ["takeUntilDestroyed"] }],
         "rxjs/no-exposed-subjects": ["error", { "allowProtected": true }],
         "no-restricted-syntax": [
           "error",
@@ -96,6 +96,11 @@
 
                   // Node
                   "./libs/node/**/*",
+
+                  //Generator
+                  "./libs/tools/generator/components/**/*",
+                  "./libs/tools/generator/core/**/*",
+                  "./libs/tools/generator/extensions/**/*",
 
                   // Import/export
                   "./libs/importer/**/*",
@@ -183,11 +188,47 @@
       }
     },
     {
+      "files": ["libs/tools/generator/components/src/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          { "patterns": ["@bitwarden/generator-components/*", "src/**/*"] }
+        ]
+      }
+    },
+    {
+      "files": ["libs/tools/generator/core/src/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          { "patterns": ["@bitwarden/generator-core/*", "src/**/*"] }
+        ]
+      }
+    },
+    {
+      "files": ["libs/tools/generator/extensions/src/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          { "patterns": ["@bitwarden/generator-extensions/*", "src/**/*"] }
+        ]
+      }
+    },
+    {
       "files": ["libs/tools/export/vault-export/vault-export-core/src/**/*.ts"],
       "rules": {
         "no-restricted-imports": [
           "error",
           { "patterns": ["@bitwarden/vault-export-core/*", "src/**/*"] }
+        ]
+      }
+    },
+    {
+      "files": ["libs/tools/export/vault-export/vault-export-ui/src/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          { "patterns": ["@bitwarden/vault-export-ui/*", "src/**/*"] }
         ]
       }
     },
@@ -207,6 +248,12 @@
       "files": ["libs/platform/src/**/*.ts"],
       "rules": {
         "no-restricted-imports": ["error", { "patterns": ["@bitwarden/platform/*", "src/**/*"] }]
+      }
+    },
+    {
+      "files": ["libs/tools/send/send-ui/src/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": ["error", { "patterns": ["@bitwarden/send-ui/*", "src/**/*"] }]
       }
     },
     {
@@ -236,6 +283,28 @@
             "selector": "CallExpression > [object.object.object.object.name='chrome'][property.name='addListener']"
           }
         ]
+      }
+    },
+    {
+      "files": ["**/*.ts"],
+      "excludedFiles": ["**/platform/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              "**/platform/**/internal", // General internal pattern
+              // All features that have been converted to barrel files
+              "**/platform/messaging/**"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["bitwarden_license/bit-common/src/**/*.ts"],
+      "rules": {
+        "no-restricted-imports": ["error", { "patterns": ["@bitwarden/bit-common/*", "src/**/*"] }]
       }
     }
   ]

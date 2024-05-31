@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewChild, ViewContainerRef } from "@angular/core";
+import { Component, ViewChild, ViewContainerRef } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import {
   combineLatest,
@@ -21,12 +21,10 @@ import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { SearchService } from "@bitwarden/common/abstractions/search.service";
 import { OrganizationApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/organization/organization-api.service.abstraction";
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { OrganizationManagementPreferencesService } from "@bitwarden/common/admin-console/abstractions/organization-management-preferences/organization-management-preferences.service";
 import { OrganizationUserService } from "@bitwarden/common/admin-console/abstractions/organization-user/organization-user.service";
 import { OrganizationUserConfirmRequest } from "@bitwarden/common/admin-console/abstractions/organization-user/requests";
-import {
-  OrganizationUserBulkResponse,
-  OrganizationUserUserDetailsResponse,
-} from "@bitwarden/common/admin-console/abstractions/organization-user/responses";
+import { OrganizationUserUserDetailsResponse } from "@bitwarden/common/admin-console/abstractions/organization-user/responses";
 import { PolicyApiServiceAbstraction as PolicyApiService } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import {
@@ -35,14 +33,14 @@ import {
   PolicyType,
 } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
+import { Policy } from "@bitwarden/common/admin-console/models/domain/policy";
 import { OrganizationKeysRequest } from "@bitwarden/common/admin-console/models/request/organization-keys.request";
+import { BillingApiServiceAbstraction } from "@bitwarden/common/billing/abstractions/billilng-api.service.abstraction";
 import { ProductType } from "@bitwarden/common/enums";
-import { ListResponse } from "@bitwarden/common/models/response/list.response";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { ValidationService } from "@bitwarden/common/platform/abstractions/validation.service";
 import { CollectionService } from "@bitwarden/common/vault/abstractions/collection.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
@@ -51,7 +49,6 @@ import { Collection } from "@bitwarden/common/vault/models/domain/collection";
 import { CollectionDetailsResponse } from "@bitwarden/common/vault/models/response/collection.response";
 import { DialogService, SimpleDialogOptions } from "@bitwarden/components";
 
-import { flagEnabled } from "../../../../utils/flags";
 import { openEntityEventsDialog } from "../../../admin-console/organizations/manage/entity-events.component";
 import { BasePeopleComponent } from "../../common/base.people.component";
 import { GroupService } from "../core";
@@ -73,10 +70,7 @@ import { ResetPasswordComponent } from "./components/reset-password.component";
   selector: "app-org-people",
   templateUrl: "people.component.html",
 })
-export class PeopleComponent
-  extends BasePeopleComponent<OrganizationUserView>
-  implements OnInit, OnDestroy
-{
+export class PeopleComponent extends BasePeopleComponent<OrganizationUserView> {
   @ViewChild("groupsTemplate", { read: ViewContainerRef, static: true })
   groupsModalRef: ViewContainerRef;
   @ViewChild("confirmTemplate", { read: ViewContainerRef, static: true })
@@ -97,8 +91,10 @@ export class PeopleComponent
   organization: Organization;
   status: OrganizationUserStatusType = null;
   orgResetPasswordPolicyEnabled = false;
+  orgIsOnSecretsManagerStandalone = false;
 
   protected canUseSecretsManager$: Observable<boolean>;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -116,7 +112,6 @@ export class PeopleComponent
     searchPipe: SearchPipe,
     userNamePipe: UserNamePipe,
     private syncService: SyncService,
-    stateService: StateService,
     private organizationService: OrganizationService,
     private organizationApiService: OrganizationApiServiceAbstraction,
     private organizationUserService: OrganizationUserService,
@@ -124,6 +119,8 @@ export class PeopleComponent
     private router: Router,
     private groupService: GroupService,
     private collectionService: CollectionService,
+    organizationManagementPreferencesService: OrganizationManagementPreferencesService,
+    private billingApiService: BillingApiServiceAbstraction,
   ) {
     super(
       apiService,
@@ -136,26 +133,24 @@ export class PeopleComponent
       logService,
       searchPipe,
       userNamePipe,
-      stateService,
       dialogService,
+      organizationManagementPreferencesService,
     );
   }
 
   async ngOnInit() {
     const organization$ = this.route.params.pipe(
-      map((params) => this.organizationService.get(params.organizationId)),
+      concatMap((params) => this.organizationService.get$(params.organizationId)),
       shareReplay({ refCount: true, bufferSize: 1 }),
     );
 
-    this.canUseSecretsManager$ = organization$.pipe(
-      map((org) => org.useSecretsManager && flagEnabled("secretsManager")),
-    );
+    this.canUseSecretsManager$ = organization$.pipe(map((org) => org.useSecretsManager));
 
     const policies$ = organization$.pipe(
       switchMap((organization) => {
         if (organization.isProviderUser) {
           return from(this.policyApiService.getPolicies(organization.id)).pipe(
-            map((response) => this.policyService.mapPoliciesFromToken(response)),
+            map((response) => Policy.fromListResponse(response)),
           );
         }
 
@@ -194,9 +189,15 @@ export class PeopleComponent
             .find((p) => p.organizationId === this.organization.id);
           this.orgResetPasswordPolicyEnabled = resetPasswordPolicy?.enabled;
 
+          const billingMetadata = await this.billingApiService.getOrganizationBillingMetadata(
+            this.organization.id,
+          );
+
+          this.orgIsOnSecretsManagerStandalone = billingMetadata.isOnSecretsManagerStandalone;
+
           await this.load();
 
-          this.searchText = qParams.search;
+          this.searchControl.setValue(qParams.search);
           if (qParams.viewEvents != null) {
             const user = this.users.filter((u) => u.id === qParams.viewEvents);
             if (user.length > 0 && user[0].status === OrganizationUserStatusType.Confirmed) {
@@ -454,6 +455,7 @@ export class PeopleComponent
         organizationUserId: user != null ? user.id : null,
         allOrganizationUserEmails: this.allUsers?.map((user) => user.email) ?? [],
         usesKeyConnector: user?.usesKeyConnector,
+        isOnSecretsManagerStandalone: this.orgIsOnSecretsManagerStandalone,
         initialTab: initialTab,
         numConfirmedMembers: this.confirmedCount,
       },
@@ -479,16 +481,13 @@ export class PeopleComponent
       return;
     }
 
-    const [modal] = await this.modalService.openViewRef(
-      BulkRemoveComponent,
-      this.bulkRemoveModalRef,
-      (comp) => {
-        comp.organizationId = this.organization.id;
-        comp.users = this.getCheckedUsers();
+    const dialogRef = BulkRemoveComponent.open(this.dialogService, {
+      data: {
+        organizationId: this.organization.id,
+        users: this.getCheckedUsers(),
       },
-    );
-
-    await modal.onClosedPromise();
+    });
+    await lastValueFrom(dialogRef.closed);
     await this.load();
   }
 
@@ -539,12 +538,17 @@ export class PeopleComponent
       );
       // FIXME: Verify that this floating promise is intentional. If it is, add an explanatory comment and ensure there is proper error handling.
       // eslint-disable-next-line @typescript-eslint/no-floating-promises
-      this.showBulkStatus(
-        users,
-        filteredUsers,
-        response,
-        this.i18nService.t("bulkReinviteMessage"),
-      );
+
+      // Bulk Status component open
+      const dialogRef = BulkStatusComponent.open(this.dialogService, {
+        data: {
+          users: users,
+          filteredUsers: filteredUsers,
+          request: response,
+          successfullMessage: this.i18nService.t("bulkReinviteMessage"),
+        },
+      });
+      await lastValueFrom(dialogRef.closed);
     } catch (e) {
       this.validationService.showError(e);
     }
@@ -556,21 +560,20 @@ export class PeopleComponent
       return;
     }
 
-    const [modal] = await this.modalService.openViewRef(
-      BulkConfirmComponent,
-      this.bulkConfirmModalRef,
-      (comp) => {
-        comp.organizationId = this.organization.id;
-        comp.users = this.getCheckedUsers();
+    const dialogRef = BulkConfirmComponent.open(this.dialogService, {
+      data: {
+        organizationId: this.organization.id,
+        users: this.getCheckedUsers(),
       },
-    );
+    });
 
-    await modal.onClosedPromise();
+    await lastValueFrom(dialogRef.closed);
     await this.load();
   }
 
   async bulkEnableSM() {
-    const users = this.getCheckedUsers();
+    const users = this.getCheckedUsers().filter((ou) => !ou.accessSecretsManager);
+
     if (users.length === 0) {
       this.platformUtilsService.showToast(
         "error",
@@ -587,6 +590,7 @@ export class PeopleComponent
 
     await lastValueFrom(dialogRef.closed);
     this.selectAll(false);
+    await this.load();
   }
 
   async events(user: OrganizationUserView) {
@@ -664,59 +668,6 @@ export class PeopleComponent
     }
 
     return true;
-  }
-
-  private async showBulkStatus(
-    users: OrganizationUserView[],
-    filteredUsers: OrganizationUserView[],
-    request: Promise<ListResponse<OrganizationUserBulkResponse>>,
-    successfullMessage: string,
-  ) {
-    const [modal, childComponent] = await this.modalService.openViewRef(
-      BulkStatusComponent,
-      this.bulkStatusModalRef,
-      (comp) => {
-        comp.loading = true;
-      },
-    );
-
-    // Workaround to handle closing the modal shortly after it has been opened
-    let close = false;
-    // eslint-disable-next-line rxjs-angular/prefer-takeuntil
-    modal.onShown.subscribe(() => {
-      if (close) {
-        modal.close();
-      }
-    });
-
-    try {
-      const response = await request;
-
-      if (modal) {
-        const keyedErrors: any = response.data
-          .filter((r) => r.error !== "")
-          .reduce((a, x) => ({ ...a, [x.id]: x.error }), {});
-        const keyedFilteredUsers: any = filteredUsers.reduce((a, x) => ({ ...a, [x.id]: x }), {});
-
-        childComponent.users = users.map((user) => {
-          let message = keyedErrors[user.id] ?? successfullMessage;
-          // eslint-disable-next-line
-          if (!keyedFilteredUsers.hasOwnProperty(user.id)) {
-            message = this.i18nService.t("bulkFilteredMessage");
-          }
-
-          return {
-            user: user,
-            error: keyedErrors.hasOwnProperty(user.id), // eslint-disable-line
-            message: message,
-          };
-        });
-        childComponent.loading = false;
-      }
-    } catch {
-      close = true;
-      modal.close();
-    }
   }
 
   private async noMasterPasswordConfirmationDialog(user: OrganizationUserView) {

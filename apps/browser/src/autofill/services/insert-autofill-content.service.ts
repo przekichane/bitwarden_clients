@@ -7,7 +7,6 @@ import {
   elementIsInputElement,
   elementIsSelectElement,
   elementIsTextAreaElement,
-  nodeIsInputElement,
 } from "../utils";
 
 import { InsertAutofillContentService as InsertAutofillContentServiceInterface } from "./abstractions/insert-autofill-content.service";
@@ -65,8 +64,8 @@ class InsertAutofillContentService implements InsertAutofillContentServiceInterf
   private fillingWithinSandboxedIframe() {
     return (
       String(self.origin).toLowerCase() === "null" ||
-      window.frameElement?.hasAttribute("sandbox") ||
-      window.location.hostname === ""
+      globalThis.frameElement?.hasAttribute("sandbox") ||
+      globalThis.location.hostname === ""
     );
   }
 
@@ -79,8 +78,8 @@ class InsertAutofillContentService implements InsertAutofillContentServiceInterf
    */
   private userCancelledInsecureUrlAutofill(savedUrls?: string[] | null): boolean {
     if (
-      !savedUrls?.some((url) => url.startsWith(`https://${window.location.hostname}`)) ||
-      window.location.protocol !== "http:" ||
+      !savedUrls?.some((url) => url.startsWith(`https://${globalThis.location.hostname}`)) ||
+      globalThis.location.protocol !== "http:" ||
       !this.isPasswordFieldWithinDocument()
     ) {
       return false;
@@ -88,10 +87,10 @@ class InsertAutofillContentService implements InsertAutofillContentServiceInterf
 
     const confirmationWarning = [
       chrome.i18n.getMessage("insecurePageWarning"),
-      chrome.i18n.getMessage("insecurePageWarningFillPrompt", [window.location.hostname]),
+      chrome.i18n.getMessage("insecurePageWarningFillPrompt", [globalThis.location.hostname]),
     ].join("\n\n");
 
-    return !confirm(confirmationWarning);
+    return !globalThis.confirm(confirmationWarning);
   }
 
   /**
@@ -101,13 +100,7 @@ class InsertAutofillContentService implements InsertAutofillContentServiceInterf
    * @private
    */
   private isPasswordFieldWithinDocument(): boolean {
-    return Boolean(
-      this.collectAutofillContentService.queryAllTreeWalkerNodes(
-        document.documentElement,
-        (node: Node) => nodeIsInputElement(node) && node.type === "password",
-        false,
-      )?.length,
-    );
+    return this.collectAutofillContentService.isPasswordFieldWithinDocument();
   }
 
   /**
@@ -129,10 +122,10 @@ class InsertAutofillContentService implements InsertAutofillContentServiceInterf
 
     const confirmationWarning = [
       chrome.i18n.getMessage("autofillIframeWarning"),
-      chrome.i18n.getMessage("autofillIframeWarningTip", [window.location.hostname]),
+      chrome.i18n.getMessage("autofillIframeWarningTip", [globalThis.location.hostname]),
     ].join("\n\n");
 
-    return !confirm(confirmationWarning);
+    return !globalThis.confirm(confirmationWarning);
   }
 
   /**
@@ -185,11 +178,18 @@ class InsertAutofillContentService implements InsertAutofillContentServiceInterf
 
   /**
    * Handles finding an element by opid and triggering click and focus events on the element.
-   * @param {string} opid
-   * @private
+   * To ensure that we trigger a blur event correctly on a filled field, we first check if the
+   * element is already focused. If it is, we blur the element before focusing on it again.
+   *
+   * @param {string} opid - The opid of the element to focus on.
    */
   private handleFocusOnFieldByOpidAction(opid: string) {
     const element = this.collectAutofillContentService.getAutofillFieldElementByOpid(opid);
+
+    if (document.activeElement === element) {
+      element.blur();
+    }
+
     this.simulateUserMouseClickAndFocusEventInteractions(element, true);
   }
 
@@ -282,7 +282,6 @@ class InsertAutofillContentService implements InsertAutofillContentServiceInterf
     }
 
     this.simulateInputElementChangedEvent(element);
-    element.blur();
   }
 
   /**
@@ -378,10 +377,6 @@ class InsertAutofillContentService implements InsertAutofillContentServiceInterf
     for (let index = 0; index < simulatedInputEvents.length; index++) {
       element.dispatchEvent(new Event(simulatedInputEvents[index], { bubbles: true }));
     }
-  }
-
-  private nodeIsElement(node: Node): node is HTMLElement {
-    return node.nodeType === Node.ELEMENT_NODE;
   }
 }
 
