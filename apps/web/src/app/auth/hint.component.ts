@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { FormBuilder, Validators } from "@angular/forms";
+import { FormBuilder, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 
@@ -20,12 +20,8 @@ export class HintComponent extends BaseHintComponent {
     email: ["", [Validators.email, Validators.required]],
   });
 
-  get emailControl(): string {
-    return this.formGroup.value.email;
-  }
-
-  set emailControl(val: string) {
-    this.formGroup.get("email").setValue(val);
+  get emailFormControl(): FormControl {
+    return this.formGroup.get("email") as FormControl;
   }
 
   constructor(
@@ -42,18 +38,18 @@ export class HintComponent extends BaseHintComponent {
 
   ngOnInit(): void {
     super.ngOnInit();
-    this.emailControl = this.email;
+    this.emailFormControl.setValue(this.email);
     this.formGroup.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((v) => {
       this.email = v.email;
     });
   }
-
-  async submitSuper() {
+  // Wrapper method to call super.submit() since arrow functions cannot use super directly
+  async superSubmit() {
     await super.submit();
   }
 
   submit = async () => {
-    this.email = this.emailControl;
-    await this.submitSuper();
+    this.email = this.emailFormControl.value;
+    await this.superSubmit();
   };
 }
