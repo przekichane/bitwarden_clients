@@ -74,7 +74,9 @@ export type UserVerificationDialogOptions = {
    *   platforms. When there are no client verification methods the user is
    *   instructed to set a pin, and this is not supported on web.
    * - "custom": Custom validation is done to verify the secret. This is
-   *   passed in from callers when opening the dialog.
+   *   passed in from callers when opening the dialog. The custom type is
+   *   meant to provide a mechanism where users can call a secured endpoint
+   *   that performs user verification server side.
    */
   verificationType?:
     | "default"
