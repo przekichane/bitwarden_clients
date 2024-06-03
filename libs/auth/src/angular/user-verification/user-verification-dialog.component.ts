@@ -142,6 +142,33 @@ export class UserVerificationDialogComponent {
    *   return;
    * }
    *
+   * ----------------------------------------------------------
+   *
+   * @example
+   * // Example 4: Custom user verification validation
+   *
+   * const result = await UserVerificationDialogComponent.open(dialogService, {
+   *   verificationType: {
+   *     type: "custom",
+   *     // Pass in a function that will be used to validate the input of the
+   *     // verification dialog, returning true when finished.
+   *     verificationFn: async (secret: VerificationWithSecret) => {
+   *       const request = (await userVerificationService.buildRequest(
+   *         secret,
+   *       )) as CustomRequestType;
+   *
+   *      // ... Do something with the custom request type
+   *
+   *       await someServicer.sendMyRequestThatVerfiesUserIdentity(
+   *         // ... Some other data
+   *         request,
+   *       );
+   *       return true;
+   *     },
+   *   },
+   * });
+   *
+   * // ... Evaluate the result as usual
    */
   static async open(
     dialogService: DialogService,
