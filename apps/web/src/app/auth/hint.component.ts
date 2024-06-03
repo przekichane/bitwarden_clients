@@ -20,6 +20,14 @@ export class HintComponent extends BaseHintComponent {
     email: ["", [Validators.email, Validators.required]],
   });
 
+  get emailControl(): string {
+    return this.formGroup.value.email;
+  }
+
+  set emailControl(val: string) {
+    this.formGroup.get("email").setValue(val);
+  }
+
   constructor(
     router: Router,
     i18nService: I18nService,
@@ -34,7 +42,7 @@ export class HintComponent extends BaseHintComponent {
 
   ngOnInit(): void {
     super.ngOnInit();
-    this.formGroup.get("email").setValue(this.email);
+    this.emailControl = this.email;
     this.formGroup.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((v) => {
       this.email = v.email;
     });
@@ -45,7 +53,7 @@ export class HintComponent extends BaseHintComponent {
   }
 
   submit = async () => {
-    this.email = this.formGroup.get("email").value;
+    this.email = this.emailControl;
     await this.submitSuper();
   };
 }
