@@ -2,10 +2,26 @@ import { CommonModule, DatePipe } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
-import { AutofocusDirective } from "@bitwarden/components";
+import {
+  AddAccountCreditDialogComponent,
+  ManageTaxInformationComponent,
+  SelectPaymentMethodComponent,
+  VerifyBankAccountComponent,
+} from "@bitwarden/angular/billing/components";
+import {
+  AsyncActionsModule,
+  AutofocusDirective,
+  ButtonModule,
+  CheckboxModule,
+  DialogModule,
+  FormFieldModule,
+  RadioButtonModule,
+  SelectModule,
+  ToastModule,
+  TypographyModule,
+} from "@bitwarden/components";
 
 import { CalloutComponent } from "./components/callout.component";
-import { BitwardenToastModule } from "./components/toastr.component";
 import { A11yInvalidDirective } from "./directives/a11y-invalid.directive";
 import { A11yTitleDirective } from "./directives/a11y-title.directive";
 import { ApiActionDirective } from "./directives/api-action.directive";
@@ -34,7 +50,7 @@ import { IconComponent } from "./vault/components/icon.component";
 
 @NgModule({
   imports: [
-    BitwardenToastModule.forRoot({
+    ToastModule.forRoot({
       maxOpened: 5,
       autoDismiss: true,
       closeButton: true,
@@ -42,6 +58,14 @@ import { IconComponent } from "./vault/components/icon.component";
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    AsyncActionsModule,
+    RadioButtonModule,
+    FormFieldModule,
+    SelectModule,
+    ButtonModule,
+    CheckboxModule,
+    DialogModule,
+    TypographyModule,
   ],
   declarations: [
     A11yInvalidDirective,
@@ -71,13 +95,17 @@ import { IconComponent } from "./vault/components/icon.component";
     UserTypePipe,
     IfFeatureDirective,
     FingerprintPipe,
+    AddAccountCreditDialogComponent,
+    ManageTaxInformationComponent,
+    SelectPaymentMethodComponent,
+    VerifyBankAccountComponent,
   ],
   exports: [
     A11yInvalidDirective,
     A11yTitleDirective,
     ApiActionDirective,
     AutofocusDirective,
-    BitwardenToastModule,
+    ToastModule,
     BoxRowDirective,
     CalloutComponent,
     CopyTextDirective,
@@ -101,6 +129,10 @@ import { IconComponent } from "./vault/components/icon.component";
     UserTypePipe,
     IfFeatureDirective,
     FingerprintPipe,
+    AddAccountCreditDialogComponent,
+    ManageTaxInformationComponent,
+    SelectPaymentMethodComponent,
+    VerifyBankAccountComponent,
   ],
   providers: [
     CreditCardNumberPipe,

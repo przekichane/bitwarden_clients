@@ -3,14 +3,16 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { firstValueFrom, switchMap } from "rxjs";
 
 import { LockComponent as BaseLockComponent } from "@bitwarden/angular/auth/components/lock.component";
-import { PinCryptoServiceAbstraction } from "@bitwarden/auth/common";
+import { PinServiceAbstraction } from "@bitwarden/auth/common";
 import { ApiService } from "@bitwarden/common/abstractions/api.service";
 import { VaultTimeoutSettingsService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout-settings.service";
 import { VaultTimeoutService } from "@bitwarden/common/abstractions/vault-timeout/vault-timeout.service";
 import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { InternalPolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
-import { DeviceTrustCryptoServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust-crypto.service.abstraction";
+import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
+import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
+import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
 import { UserVerificationService } from "@bitwarden/common/auth/abstractions/user-verification/user-verification.service.abstraction";
 import { DeviceType } from "@bitwarden/common/enums";
@@ -24,6 +26,7 @@ import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/pl
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
 import { BiometricStateService } from "@bitwarden/common/platform/biometrics/biometric-state.service";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
+import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { DialogService } from "@bitwarden/components";
 
 const BroadcasterSubscriptionId = "LockComponent";
@@ -58,11 +61,14 @@ export class LockComponent extends BaseLockComponent {
     passwordStrengthService: PasswordStrengthServiceAbstraction,
     logService: LogService,
     dialogService: DialogService,
-    deviceTrustCryptoService: DeviceTrustCryptoServiceAbstraction,
+    deviceTrustService: DeviceTrustServiceAbstraction,
     userVerificationService: UserVerificationService,
-    pinCryptoService: PinCryptoServiceAbstraction,
+    pinService: PinServiceAbstraction,
     biometricStateService: BiometricStateService,
     accountService: AccountService,
+    authService: AuthService,
+    kdfConfigService: KdfConfigService,
+    syncService: SyncService,
   ) {
     super(
       masterPasswordService,
@@ -82,11 +88,14 @@ export class LockComponent extends BaseLockComponent {
       policyService,
       passwordStrengthService,
       dialogService,
-      deviceTrustCryptoService,
+      deviceTrustService,
       userVerificationService,
-      pinCryptoService,
+      pinService,
       biometricStateService,
       accountService,
+      authService,
+      kdfConfigService,
+      syncService,
     );
   }
 

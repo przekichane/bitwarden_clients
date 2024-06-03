@@ -1,7 +1,8 @@
 import { mock, MockProxy } from "jest-mock-extended";
 import { BehaviorSubject } from "rxjs";
 
-import { DeviceTrustCryptoServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust-crypto.service.abstraction";
+import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
+import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { FakeMasterPasswordService } from "@bitwarden/common/auth/services/master-password/fake-master-password.service";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
@@ -16,6 +17,7 @@ import { UserId } from "@bitwarden/common/types/guid";
 import { UserKey } from "@bitwarden/common/types/key";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
 import { FolderService } from "@bitwarden/common/vault/abstractions/folder/folder.service.abstraction";
+import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
 import { CipherType } from "@bitwarden/common/vault/enums/cipher-type";
 import { Cipher } from "@bitwarden/common/vault/models/domain/cipher";
 import { Folder } from "@bitwarden/common/vault/models/domain/folder";
@@ -42,11 +44,13 @@ describe("KeyRotationService", () => {
   let mockSendService: MockProxy<SendService>;
   let mockEmergencyAccessService: MockProxy<EmergencyAccessService>;
   let mockResetPasswordService: MockProxy<OrganizationUserResetPasswordService>;
-  let mockDeviceTrustCryptoService: MockProxy<DeviceTrustCryptoServiceAbstraction>;
+  let mockDeviceTrustService: MockProxy<DeviceTrustServiceAbstraction>;
   let mockCryptoService: MockProxy<CryptoService>;
   let mockEncryptService: MockProxy<EncryptService>;
   let mockStateService: MockProxy<StateService>;
   let mockConfigService: MockProxy<ConfigService>;
+  let mockKdfConfigService: MockProxy<KdfConfigService>;
+  let mockSyncService: MockProxy<SyncService>;
 
   const mockUserId = Utils.newGuid() as UserId;
   const mockAccountService: FakeAccountService = mockAccountServiceWith(mockUserId);
@@ -60,11 +64,13 @@ describe("KeyRotationService", () => {
     mockSendService = mock<SendService>();
     mockEmergencyAccessService = mock<EmergencyAccessService>();
     mockResetPasswordService = mock<OrganizationUserResetPasswordService>();
-    mockDeviceTrustCryptoService = mock<DeviceTrustCryptoServiceAbstraction>();
+    mockDeviceTrustService = mock<DeviceTrustServiceAbstraction>();
     mockCryptoService = mock<CryptoService>();
     mockEncryptService = mock<EncryptService>();
     mockStateService = mock<StateService>();
     mockConfigService = mock<ConfigService>();
+    mockKdfConfigService = mock<KdfConfigService>();
+    mockSyncService = mock<SyncService>();
 
     keyRotationService = new UserKeyRotationService(
       mockMasterPasswordService,
@@ -74,12 +80,13 @@ describe("KeyRotationService", () => {
       mockSendService,
       mockEmergencyAccessService,
       mockResetPasswordService,
-      mockDeviceTrustCryptoService,
+      mockDeviceTrustService,
       mockCryptoService,
       mockEncryptService,
       mockStateService,
       mockAccountService,
-      mockConfigService,
+      mockKdfConfigService,
+      mockSyncService,
     );
   });
 
@@ -185,16 +192,6 @@ describe("KeyRotationService", () => {
         "mockMasterKey" as any,
         mockUserId,
       );
-    });
-
-    it("uses legacy rotation if feature flag is off", async () => {
-      mockConfigService.getFeatureFlag.mockResolvedValueOnce(false);
-
-      await keyRotationService.rotateUserKeyAndEncryptedData("mockMasterPassword");
-
-      expect(mockApiService.postUserKeyUpdate).toHaveBeenCalled();
-      expect(mockEmergencyAccessService.postLegacyRotation).toHaveBeenCalled();
-      expect(mockResetPasswordService.postLegacyRotation).toHaveBeenCalled();
     });
 
     it("throws if server rotation fails", async () => {
