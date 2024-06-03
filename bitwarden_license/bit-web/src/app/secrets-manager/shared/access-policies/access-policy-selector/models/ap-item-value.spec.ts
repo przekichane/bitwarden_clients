@@ -37,7 +37,7 @@ describe("convertToPeopleAccessPoliciesView", () => {
   });
 
   it("should return empty arrays if no selected policy values are provided", () => {
-    const selectedPolicyValues = [];
+    const selectedPolicyValues: ApItemValueType[] = [];
 
     const result = convertToPeopleAccessPoliciesView(selectedPolicyValues);
 
@@ -67,7 +67,7 @@ describe("convertToServiceAccountGrantedPoliciesView", () => {
   });
 
   it("should return empty array if no selected project policies are provided", () => {
-    const selectedPolicyValues = [];
+    const selectedPolicyValues: ApItemValueType[] = [];
 
     const result = convertToServiceAccountGrantedPoliciesView(selectedPolicyValues);
 
@@ -85,7 +85,7 @@ describe("convertToProjectServiceAccountsAccessPoliciesView", () => {
   });
 
   it("should return empty array if nothing is selected.", () => {
-    const selectedPolicyValues = [];
+    const selectedPolicyValues: ApItemValueType[] = [];
 
     const result = convertToProjectServiceAccountsAccessPoliciesView(selectedPolicyValues);
 
@@ -138,7 +138,7 @@ describe("convertToSecretAccessPoliciesView", () => {
   });
 
   it("should return empty arrays if nothing is selected.", () => {
-    const selectedPolicyValues = [];
+    const selectedPolicyValues: ApItemValueType[] = [];
 
     const result = convertToSecretAccessPoliciesView(selectedPolicyValues);
 
