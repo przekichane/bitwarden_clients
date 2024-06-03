@@ -1,6 +1,7 @@
-import { Component } from "@angular/core";
+import { Component, Input } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
 
+import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import {
@@ -33,6 +34,8 @@ import { PasswordCalloutComponent } from "../password-callout/password-callout.c
   ],
 })
 export class InputPasswordComponent {
+  @Input() policy: MasterPasswordPolicyOptions;
+
   minPasswordLength = Utils.minimumPasswordLength;
 
   currentHintLength = 0;

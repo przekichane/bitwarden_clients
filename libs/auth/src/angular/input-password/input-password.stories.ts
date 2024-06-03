@@ -1,5 +1,6 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 
+import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 
 import { I18nMockService } from "../../../../components/src/utils/i18n-mock.service";
@@ -42,11 +43,35 @@ export default {
 
             inputRequired: "Input is required.", // for BitErrorComponent error message
             toggleVisibility: "Toggle visibility", // for BitPasswordInputToggleDirective
+
+            // Password Callout
+            masterPasswordPolicyInEffect:
+              "One or more organization policies require your master password to meet the following requirements:",
+            policyInEffectMinLength: "Minimum length of __$1__",
+            policyInEffectMinComplexity: "Minimum complexity score of __$1__",
+            policyInEffectUppercase: "Contain one or more uppercase characters",
+            policyInEffectLowercase: "Contain one or more lowercase characters",
+            policyInEffectNumbers: "Contain one or more numbers",
+            policyInEffectSpecial:
+              "Contain one or more of the following special characters !@#$%^&*",
+            weak: "Weak",
+            good: "Good",
+            strong: "Strong",
           }),
         },
       ],
     }),
   ],
+  args: {
+    policy: {
+      minComplexity: 3,
+      minLength: 10,
+      requireUpper: true,
+      requireLower: true,
+      requireNumbers: true,
+      requireSpecial: true,
+    } as MasterPasswordPolicyOptions,
+  },
 } as Meta;
 
 type Story = StoryObj<InputPasswordComponent>;
@@ -55,7 +80,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <auth-input-password></auth-input-password>
+      <auth-input-password [policy]="policy"></auth-input-password>
     `,
   }),
 };
