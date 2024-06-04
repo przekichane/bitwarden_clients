@@ -143,7 +143,7 @@ export class EventCollectionService implements EventCollectionServiceAbstraction
     }
 
     // If no ciphers there must be an organization id provided
-    if ((ciphers == null || ciphers.length != 0) && organizationId == null) {
+    if ((ciphers == null || ciphers.length == 0) && organizationId == null) {
       return false;
     }
 
