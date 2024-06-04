@@ -1,11 +1,25 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import { of } from "rxjs";
 
+import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 
 import { I18nMockService } from "../../../../components/src/utils/i18n-mock.service";
 
 import { InputPasswordComponent } from "./input-password.component";
+
+class MockPolicyService implements Partial<PolicyService> {
+  masterPasswordPolicyOptions$ = () =>
+    of({
+      minComplexity: 3,
+      minLength: 10,
+      requireUpper: true,
+      requireLower: true,
+      requireNumbers: true,
+      requireSpecial: true,
+    } as MasterPasswordPolicyOptions);
+}
 
 export default {
   title: "Auth/Input Password",
@@ -14,6 +28,10 @@ export default {
     moduleMetadata({
       imports: [],
       providers: [
+        {
+          provide: PolicyService,
+          useClass: MockPolicyService,
+        },
         {
           provide: I18nService,
           useValue: new I18nMockService({
@@ -60,16 +78,6 @@ export default {
       ],
     }),
   ],
-  args: {
-    policy: {
-      minComplexity: 3,
-      minLength: 10,
-      requireUpper: true,
-      requireLower: true,
-      requireNumbers: true,
-      requireSpecial: true,
-    } as MasterPasswordPolicyOptions,
-  },
 } as Meta;
 
 type Story = StoryObj<InputPasswordComponent>;
@@ -78,7 +86,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <auth-input-password [policy]="policy"></auth-input-password>
+      <auth-input-password></auth-input-password>
     `,
   }),
 };

@@ -1,6 +1,8 @@
-import { Component, Input } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
+import { firstValueFrom } from "rxjs";
 
+import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
@@ -33,8 +35,8 @@ import { PasswordCalloutComponent } from "../password-callout/password-callout.c
     PasswordCalloutComponent,
   ],
 })
-export class InputPasswordComponent {
-  @Input() policy: MasterPasswordPolicyOptions;
+export class InputPasswordComponent implements OnInit {
+  policy: MasterPasswordPolicyOptions = null;
 
   minPasswordLength = Utils.minimumPasswordLength;
 
@@ -69,7 +71,12 @@ export class InputPasswordComponent {
   constructor(
     private formBuilder: FormBuilder,
     private i18nService: I18nService,
+    private policyService: PolicyService,
   ) {}
+
+  async ngOnInit() {
+    this.policy = await firstValueFrom(this.policyService.masterPasswordPolicyOptions$());
+  }
 
   submit() {}
 }
