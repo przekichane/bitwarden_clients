@@ -314,11 +314,11 @@ const routes: Routes = [
     children: [
       {
         path: "hint",
+        canActivate: [unauthGuardFn()],
         children: [
           {
             path: "",
             component: HintComponent,
-            canActivate: [unauthGuardFn()],
             data: {
               pageTitle: "passwordHint",
               titleId: "passwordHint",
