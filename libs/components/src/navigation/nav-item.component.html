@@ -47,7 +47,7 @@
 
       <!-- Main content of `NavItem` -->
       <ng-template #anchorAndButtonContent>
-        <div [ngClass]="[variant === 'tree' ? 'tw-py-1' : 'tw-py-2']">
+        <div [title]="text" [ngClass]="[variant === 'tree' ? 'tw-py-1' : 'tw-py-2']">
           <i
             class="bwi bwi-fw tw-text-alt2 tw-mx-1 {{ icon }}"
             [attr.aria-hidden]="data.open"
@@ -55,7 +55,6 @@
           ></i
           ><span
             *ngIf="data.open"
-            [title]="text"
             [ngClass]="showActiveStyles ? 'tw-font-bold' : 'tw-font-semibold'"
             >{{ text }}</span
           >
