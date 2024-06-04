@@ -43,7 +43,9 @@ type Story = StoryObj<LayoutComponent>;
 export const Empty: Story = {
   render: (args) => ({
     props: args,
-    template: /* HTML */ `<bit-layout></bit-layout>`,
+    template: /* HTML */ `<bit-layout>
+      <bit-side-nav></bit-side-nav>
+    </bit-layout>`,
   }),
 };
 
