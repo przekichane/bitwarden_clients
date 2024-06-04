@@ -15,9 +15,10 @@
   >
     <div
       [ngStyle]="{
-        'padding-left': (variant === 'tree' ? 2.5 : 1) + treeDepth * 1.5 + 'rem'
+        'padding-left': data.open ? (variant === 'tree' ? 2.5 : 1) + treeDepth * 1.5 + 'rem' : '0'
       }"
-      class="tw-relative tw-flex tw-items-center tw-pr-4"
+      [ngClass]="data.open ? 'tw-pr-4' : ''"
+      class="tw-relative tw-flex"
     >
       <div [ngClass]="[variant === 'tree' ? 'tw-py-1' : 'tw-py-2']">
         <div
@@ -47,7 +48,13 @@
 
       <!-- Main content of `NavItem` -->
       <ng-template #anchorAndButtonContent>
-        <div [title]="text" [ngClass]="[variant === 'tree' ? 'tw-py-1' : 'tw-py-2']">
+        <div
+          [title]="text"
+          [ngClass]="[
+            variant === 'tree' ? 'tw-py-1' : 'tw-py-2',
+            data.open ? '' : 'tw-text-center'
+          ]"
+        >
           <i
             class="bwi bwi-fw tw-text-alt2 tw-mx-1 {{ icon }}"
             [attr.aria-hidden]="data.open"
