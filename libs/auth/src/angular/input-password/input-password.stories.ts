@@ -39,7 +39,7 @@ export default {
 
             // Angular Validators
             required: "required",
-            inputMaxLength: (max) => `51/${max} character maximum`,
+            inputMaxLength: (max) => `51/${max} character maximum`, // TODO-rr-bw: not sure how to show the current length in a Validator error message
 
             inputRequired: "Input is required.", // for BitErrorComponent error message
             toggleVisibility: "Toggle visibility", // for BitPasswordInputToggleDirective
@@ -54,9 +54,7 @@ export default {
             policyInEffectNumbers: "Contain one or more numbers",
             policyInEffectSpecial:
               "Contain one or more of the following special characters !@#$%^&*",
-            weak: "Weak",
             good: "Good",
-            strong: "Strong",
           }),
         },
       ],

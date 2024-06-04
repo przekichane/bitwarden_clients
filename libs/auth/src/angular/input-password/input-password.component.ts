@@ -38,7 +38,6 @@ export class InputPasswordComponent {
 
   minPasswordLength = Utils.minimumPasswordLength;
 
-  currentHintLength = 0;
   minHintLength = 0;
   maxHintLength = 50;
 
@@ -47,7 +46,7 @@ export class InputPasswordComponent {
       password: ["", Validators.required, Validators.minLength(this.minPasswordLength)],
       confirmedPassword: ["", Validators.required, Validators.minLength(this.minPasswordLength)],
       hint: [
-        null,
+        "",
         [
           Validators.maxLength(this.maxHintLength),
           InputsFieldMatch.validateInputsDoesntMatch(
