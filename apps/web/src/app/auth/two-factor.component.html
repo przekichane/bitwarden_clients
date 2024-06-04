@@ -7,12 +7,7 @@
   autocomplete="off"
 >
   <div class="row justify-content-md-center mt-5">
-    <div
-      class="col-5"
-      [ngClass]="{
-        'col-9': !duoFrameless && isDuoProvider
-      }"
-    >
+    <div class="col-5">
       <p class="lead text-center mb-4">{{ title }}</p>
       <div class="card d-block">
         <div class="card-body">
@@ -83,21 +78,10 @@
           </ng-container>
           <!-- Duo -->
           <ng-container *ngIf="isDuoProvider">
-            <ng-container *ngIf="duoFrameless">
-              <p *ngIf="selectedProviderType === providerType.OrganizationDuo" class="tw-mb-0">
-                {{ "duoRequiredByOrgForAccount" | i18n }}
-              </p>
-              <p>{{ "launchDuoAndFollowStepsToFinishLoggingIn" | i18n }}</p>
-            </ng-container>
-
-            <ng-container *ngIf="!duoFrameless">
-              <div id="duo-frame" class="mb-3">
-                <iframe
-                  id="duo_iframe"
-                  sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-                ></iframe>
-              </div>
-            </ng-container>
+            <p *ngIf="selectedProviderType === providerType.OrganizationDuo" class="tw-mb-0">
+              {{ "duoRequiredByOrgForAccount" | i18n }}
+            </p>
+            <p>{{ "launchDuoAndFollowStepsToFinishLoggingIn" | i18n }}</p>
           </ng-container>
           <i
             class="bwi bwi-spinner text-muted bwi-spin pull-right"
@@ -153,7 +137,7 @@
               type="button"
               class="btn btn-primary btn-block"
               [disabled]="form.loading"
-              *ngIf="duoFrameless && isDuoProvider"
+              *ngIf="isDuoProvider"
             >
               <span> {{ "launchDuo" | i18n }} </span>
             </button>
