@@ -3440,5 +3440,8 @@
   },
   "contactYourOrgAdmin": {
     "message": "Items in deactivated organizations cannot be accessed. Contact your organization owner for assistance."
+  },
+  "onlyOrganizationMembersCanView": {
+    "message": "Only organization members with access to these collections will be able to see the item."
   }
 }
