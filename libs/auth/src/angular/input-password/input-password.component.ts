@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
 import { firstValueFrom } from "rxjs";
 
@@ -36,7 +36,11 @@ import { PasswordCalloutComponent } from "../password-callout/password-callout.c
   ],
 })
 export class InputPasswordComponent implements OnInit {
-  policy: MasterPasswordPolicyOptions = null;
+  @Input() contentTitle: string;
+  @Input() buttonText: string;
+  @Input() orgId: string;
+
+  policy: MasterPasswordPolicyOptions;
 
   minPasswordLength = Utils.minimumPasswordLength;
 
