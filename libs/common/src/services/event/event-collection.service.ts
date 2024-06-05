@@ -28,6 +28,11 @@ export class EventCollectionService implements EventCollectionServiceAbstraction
     );
   }
 
+  /** Adds an event to the active user's event collection
+   *  @param eventType the event type to be added
+   *  @param ciphers The collection of ciphers to log events for
+   *  @param uploadImmediately in some cases the recorded events should be uploaded right after being added
+   */
   async collectMany(
     eventType: EventType,
     ciphers: CipherView[],
@@ -55,9 +60,9 @@ export class EventCollectionService implements EventCollectionServiceAbstraction
     );
 
     await eventStore.update(
-      (currentEvents, [newEvents]) => {
+      (currentEvents, newEvents) => {
         const events = currentEvents ?? [];
-        events.push(newEvents);
+        events.push(...newEvents);
         return events;
       },
       {
