@@ -11,7 +11,7 @@ export const positionFixedWrapperDecorator = (wrapper?: (story: string) => strin
      * https://github.com/storybookjs/storybook/issues/8011#issue-490251969
      */
     (story) =>
-      /* HTML */ `<div class="tw-scale-100 tw-border-2 tw-border-solid tw-border-[red]">
+      /* HTML */ `<div class="tw-scale-100 tw-h-screen tw-border-2 tw-border-solid tw-border-[red]">
         ${wrapper ? wrapper(story) : story}
       </div>`,
   );
