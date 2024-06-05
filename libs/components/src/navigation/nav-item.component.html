@@ -49,10 +49,10 @@
       <ng-template #anchorAndButtonContent>
         <div
           [title]="text"
-          class="tw-truncate tw-pr-4"
+          class="tw-truncate"
           [ngClass]="[
             variant === 'tree' ? 'tw-py-1' : 'tw-py-2',
-            data.open ? '' : 'tw-text-center'
+            data.open ? 'tw-pr-4' : 'tw-text-center'
           ]"
         >
           <i
