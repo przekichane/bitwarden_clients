@@ -1,9 +1,10 @@
 import { mock, MockProxy } from "jest-mock-extended";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, of } from "rxjs";
 
 import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
 import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { FakeMasterPasswordService } from "@bitwarden/common/auth/services/master-password/fake-master-password.service";
+import { ListResponse } from "@bitwarden/common/models/response/list.response";
 import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
@@ -30,6 +31,7 @@ import {
 } from "../../../../../../libs/common/spec/fake-account-service";
 import { OrganizationUserResetPasswordService } from "../../admin-console/organizations/members/services/organization-user-reset-password/organization-user-reset-password.service";
 import { StateService } from "../../core";
+import { WebauthnLoginCredentialResponse } from "../core/services/webauthn-login/response/webauthn-login-credential.response";
 import { WebAuthnLoginAdminApiService } from "../core/services/webauthn-login/webauthn-login-admin-api.service";
 import { EmergencyAccessService } from "../emergency-access";
 
@@ -119,6 +121,9 @@ describe("KeyRotationService", () => {
 
       // Mock private key
       mockCryptoService.getPrivateKey.mockResolvedValue("MockPrivateKey" as any);
+      mockCryptoService.userKey$.mockReturnValue(
+        of(new SymmetricCryptoKey(new Uint8Array(64)) as UserKey),
+      );
 
       // Mock ciphers
       const mockCiphers = [createMockCipher("1", "Cipher 1"), createMockCipher("2", "Cipher 2")];
@@ -134,7 +139,17 @@ describe("KeyRotationService", () => {
       sends = new BehaviorSubject<Send[]>(mockSends);
       mockSendService.sends$ = sends;
 
-      // Mock encryption methods
+      // Mock webauthn keys
+      const mockWebauthnKeys: WebauthnLoginCredentialResponse[] = [];
+      mockWebauthnLoginAdminApiService.getCredentials.mockResolvedValue(
+        new ListResponse<WebauthnLoginCredentialResponse>(
+          {
+            Data: mockWebauthnKeys,
+          },
+          WebauthnLoginCredentialResponse,
+        ),
+      );
+
       mockEncryptService.encrypt.mockResolvedValue({
         encryptedString: "mockEncryptedData",
       } as any);
