@@ -150,6 +150,7 @@ describe("KeyRotationService", () => {
         ),
       );
 
+      // Mock encryption methods
       mockEncryptService.encrypt.mockResolvedValue({
         encryptedString: "mockEncryptedData",
       } as any);
