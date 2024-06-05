@@ -30,6 +30,7 @@ import {
 } from "../../../../../../libs/common/spec/fake-account-service";
 import { OrganizationUserResetPasswordService } from "../../admin-console/organizations/members/services/organization-user-reset-password/organization-user-reset-password.service";
 import { StateService } from "../../core";
+import { WebAuthnLoginAdminApiService } from "../core/services/webauthn-login/webauthn-login-admin-api.service";
 import { EmergencyAccessService } from "../emergency-access";
 
 import { UserKeyRotationApiService } from "./user-key-rotation-api.service";
@@ -51,6 +52,7 @@ describe("KeyRotationService", () => {
   let mockConfigService: MockProxy<ConfigService>;
   let mockKdfConfigService: MockProxy<KdfConfigService>;
   let mockSyncService: MockProxy<SyncService>;
+  let mockWebauthnLoginAdminApiService: MockProxy<WebAuthnLoginAdminApiService>;
 
   const mockUserId = Utils.newGuid() as UserId;
   const mockAccountService: FakeAccountService = mockAccountServiceWith(mockUserId);
@@ -71,6 +73,7 @@ describe("KeyRotationService", () => {
     mockConfigService = mock<ConfigService>();
     mockKdfConfigService = mock<KdfConfigService>();
     mockSyncService = mock<SyncService>();
+    mockWebauthnLoginAdminApiService = mock<WebAuthnLoginAdminApiService>();
 
     keyRotationService = new UserKeyRotationService(
       mockMasterPasswordService,
@@ -87,6 +90,7 @@ describe("KeyRotationService", () => {
       mockAccountService,
       mockKdfConfigService,
       mockSyncService,
+      mockWebauthnLoginAdminApiService,
     );
   });
 
