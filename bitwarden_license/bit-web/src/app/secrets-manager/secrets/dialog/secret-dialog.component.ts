@@ -59,7 +59,7 @@ export class SecretDialogComponent implements OnInit {
   projects: ProjectListView[];
   addNewProject = false;
   newProjectGuid = Utils.newGuid();
-  tabIndex: SecretDialogTabType;
+  tabIndex: SecretDialogTabType = SecretDialogTabType.NameValuePair;
 
   protected formGroup = new FormGroup({
     name: new FormControl("", {
