@@ -34,8 +34,6 @@ import { TwoFactorYubiKeyComponent } from "./two-factor-yubikey.component";
   templateUrl: "two-factor-setup.component.html",
 })
 export class TwoFactorSetupComponent implements OnInit, OnDestroy {
-  @ViewChild("recoveryTemplate", { read: ViewContainerRef, static: true })
-  recoveryModalRef: ViewContainerRef;
   @ViewChild("authenticatorTemplate", { read: ViewContainerRef, static: true })
   authenticatorModalRef: ViewContainerRef;
   @ViewChild("yubikeyTemplate", { read: ViewContainerRef, static: true })
@@ -179,11 +177,14 @@ export class TwoFactorSetupComponent implements OnInit, OnDestroy {
         if (!result) {
           return;
         }
-        const emailComp = await this.openModal(this.emailModalRef, TwoFactorEmailComponent);
-        await emailComp.auth(result);
-        emailComp.onUpdated.pipe(takeUntil(this.destroy$)).subscribe((enabled: boolean) => {
-          this.updateStatus(enabled, TwoFactorProviderType.Email);
+        const authComp: DialogRef<boolean, any> = TwoFactorEmailComponent.open(this.dialogService, {
+          data: result,
         });
+        authComp.componentInstance.onChangeStatus
+          .pipe(takeUntil(this.destroy$))
+          .subscribe((enabled: boolean) => {
+            this.updateStatus(enabled, TwoFactorProviderType.Email);
+          });
         break;
       }
       case TwoFactorProviderType.WebAuthn: {
@@ -209,8 +210,8 @@ export class TwoFactorSetupComponent implements OnInit, OnDestroy {
   async recoveryCode() {
     const result = await this.callTwoFactorVerifyDialog(-1 as TwoFactorProviderType);
     if (result) {
-      const recoverComp = await this.openModal(this.recoveryModalRef, TwoFactorRecoveryComponent);
-      recoverComp.auth(result);
+      const recoverComp = TwoFactorRecoveryComponent.open(this.dialogService, { data: result });
+      await lastValueFrom(recoverComp.closed);
     }
   }
 
