@@ -22,26 +22,33 @@ export class AccessPolicySelectorService {
       return false;
     }
 
-    const selectedUserReadWritePolicy = selectedPoliciesValues.find(
-      (s) =>
-        s.type === ApItemEnum.User &&
-        s.currentUser &&
-        s.permission === ApPermissionEnum.CanReadWrite,
-    );
+    if (!this.userHasReadWriteAccess(selectedPoliciesValues)) {
+      return true;
+    }
 
-    const selectedGroupReadWritePolicies = selectedPoliciesValues.filter(
-      (s) =>
-        s.type === ApItemEnum.Group &&
-        s.permission == ApPermissionEnum.CanReadWrite &&
-        s.currentUserInGroup,
-    );
+    return false;
+  }
 
-    if (selectedGroupReadWritePolicies == null || selectedGroupReadWritePolicies.length == 0) {
-      if (selectedUserReadWritePolicy == null) {
-        return true;
-      } else {
-        return false;
-      }
+  async showSecretAccessRemovalWarning(
+    organizationId: string,
+    current: ApItemViewType[],
+    selectedPoliciesValues: ApItemValueType[],
+  ): Promise<boolean> {
+    if (current.length === 0) {
+      return false;
+    }
+
+    const organization = await this.organizationService.get(organizationId);
+    if (organization.isOwner || organization.isAdmin) {
+      return false;
+    }
+
+    if (!this.userHasReadWriteAccess(current)) {
+      return false;
+    }
+
+    if (!this.userHasReadWriteAccess(selectedPoliciesValues)) {
+      return true;
     }
 
     return false;
@@ -66,5 +73,26 @@ export class AccessPolicySelectorService {
     const currentIds = current.map((x) => x.id);
     const selectedIds = selected.map((x) => x.id);
     return !currentIds.every((id) => selectedIds.includes(id));
+  }
+
+  private userHasReadWriteAccess(policies: ApItemValueType[] | ApItemViewType[]): boolean {
+    const userReadWritePolicy = (policies as Array<ApItemValueType | ApItemViewType>).find(
+      (s) =>
+        s.type === ApItemEnum.User &&
+        s.currentUser &&
+        s.permission === ApPermissionEnum.CanReadWrite,
+    );
+
+    const groupReadWritePolicies = (policies as Array<ApItemValueType | ApItemViewType>).filter(
+      (s) =>
+        s.type === ApItemEnum.Group &&
+        s.permission == ApPermissionEnum.CanReadWrite &&
+        s.currentUserInGroup,
+    );
+
+    if (groupReadWritePolicies.length > 0 || userReadWritePolicy != null) {
+      return true;
+    }
+    return false;
   }
 }
