@@ -143,15 +143,7 @@ export class SecretDialogComponent implements OnInit {
       return;
     }
 
-    this.formGroup.markAllAsTouched();
-    if (this.formGroup.invalid) {
-      if (this.tabIndex !== SecretDialogTabType.NameValuePair) {
-        this.platformUtilsService.showToast(
-          "error",
-          null,
-          this.i18nService.t("fieldOnTabRequiresAttention", this.i18nService.t("nameValuePair")),
-        );
-      }
+    if (this.isFormInvalid()) {
       return;
     }
 
@@ -161,19 +153,18 @@ export class SecretDialogComponent implements OnInit {
       ...this.formGroup.value.serviceAccountAccessPolicies,
     ]);
 
-    if (this.data.operation === OperationType.Edit) {
-      const showAccessRemovalWarning =
-        await this.accessPolicySelectorService.showSecretAccessRemovalWarning(
-          this.data.organizationId,
-          this.currentPeopleAccessPolicies,
-          this.formGroup.value.peopleAccessPolicies,
-        );
+    const showAccessRemovalWarning =
+      this.data.operation === OperationType.Edit &&
+      (await this.accessPolicySelectorService.showSecretAccessRemovalWarning(
+        this.data.organizationId,
+        this.currentPeopleAccessPolicies,
+        this.formGroup.value.peopleAccessPolicies,
+      ));
 
-      if (showAccessRemovalWarning) {
-        const confirmed = await this.showWarning();
-        if (!confirmed) {
-          return;
-        }
+    if (showAccessRemovalWarning) {
+      const confirmed = await this.showWarning();
+      if (!confirmed) {
+        return;
       }
     }
 
@@ -416,5 +407,19 @@ export class SecretDialogComponent implements OnInit {
       type: "warning",
     });
     return confirmed;
+  }
+
+  private isFormInvalid(): boolean {
+    this.formGroup.markAllAsTouched();
+
+    if (this.formGroup.invalid && this.tabIndex !== SecretDialogTabType.NameValuePair) {
+      this.platformUtilsService.showToast(
+        "error",
+        null,
+        this.i18nService.t("fieldOnTabRequiresAttention", this.i18nService.t("nameValuePair")),
+      );
+    }
+
+    return this.formGroup.invalid;
   }
 }
