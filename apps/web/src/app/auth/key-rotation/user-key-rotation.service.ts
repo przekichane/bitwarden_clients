@@ -5,7 +5,6 @@ import { AccountService } from "@bitwarden/common/auth/abstractions/account.serv
 import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
 import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
 import { InternalMasterPasswordServiceAbstraction } from "@bitwarden/common/auth/abstractions/master-password.service.abstraction";
-import { WebauthnRotateCredentialRequest } from "@bitwarden/common/auth/models/request/webauthn-rotate-credential.request";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
@@ -19,8 +18,7 @@ import { CipherWithIdRequest } from "@bitwarden/common/vault/models/request/ciph
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
 
 import { OrganizationUserResetPasswordService } from "../../admin-console/organizations/members/services/organization-user-reset-password/organization-user-reset-password.service";
-import { RotateableKeySetService } from "../core/services/rotateable-key-set.service";
-import { WebAuthnLoginAdminApiService } from "../core/services/webauthn-login/webauthn-login-admin-api.service";
+import { WebauthnLoginAdminService } from "../core";
 import { EmergencyAccessService } from "../emergency-access";
 
 import { UpdateKeyRequest } from "./request/update-key.request";
@@ -43,8 +41,7 @@ export class UserKeyRotationService {
     private accountService: AccountService,
     private kdfConfigService: KdfConfigService,
     private syncService: SyncService,
-    private webauthnLoginAdminApiService: WebAuthnLoginAdminApiService,
-    private rotateableKeySetService: RotateableKeySetService,
+    private webauthnLoginAdminService: WebauthnLoginAdminService,
   ) {}
 
   /**
@@ -100,7 +97,10 @@ export class UserKeyRotationService {
     request.sends = await this.sendService.getRotatedKeys(newUserKey);
     request.emergencyAccessKeys = await this.emergencyAccessService.getRotatedKeys(newUserKey);
     request.resetPasswordKeys = await this.resetPasswordService.getRotatedKeys(newUserKey);
-    request.webauthnKeys = await this.rotateWebAuthnKeys(oldUserKey, newUserKey);
+    request.webauthnKeys = await this.webauthnLoginAdminService.rotateWebAuthnKeys(
+      oldUserKey,
+      newUserKey,
+    );
 
     await this.apiService.postUserKeyUpdate(request);
 
@@ -145,30 +145,6 @@ export class UserKeyRotationService {
         const encryptedFolder = await this.folderService.encrypt(folder, newUserKey);
         return new FolderWithIdRequest(encryptedFolder);
       }),
-    );
-  }
-
-  private async rotateWebAuthnKeys(
-    oldUserKey: UserKey,
-    newUserKey: UserKey,
-  ): Promise<WebauthnRotateCredentialRequest[]> {
-    return Promise.all(
-      (await this.webauthnLoginAdminApiService.getCredentials()).data
-        .filter((c) => c.hasPrfKeyset())
-        .map(async (response) => {
-          const keyset = response.getRotateableKeyset();
-          const rotatedKeyset = await this.rotateableKeySetService.rotateKeySet(
-            keyset,
-            oldUserKey,
-            newUserKey,
-          );
-          const request = new WebauthnRotateCredentialRequest(
-            response.id,
-            rotatedKeyset.encryptedPublicKey,
-            rotatedKeyset.encryptedUserKey,
-          );
-          return request;
-        }),
     );
   }
 }
