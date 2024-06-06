@@ -51,6 +51,9 @@ export default {
               "If you forget your password, the password hint can be sent to your email. __$1__/__$2__ character maximum.",
             hintEqualsPassword: "Your hint cannot be your master password", // TODO-rr-bw: update this in messages.json to match figma
 
+            // Button text
+            setMasterPassword: "Set master password",
+
             // Other
             checkForBreaches: "Check known data breaches for this password",
             createAccount: "Create account",
