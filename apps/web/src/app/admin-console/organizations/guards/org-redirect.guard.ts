@@ -6,6 +6,13 @@ import {
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 
+/**
+ *
+ * `CanActivateFn` that returns a URL Tree redirecting to a caller provided
+ * sub route of `/organizations/{id}/`. If no sub route is provided the URL
+ * tree returned will redirect to `/organizations/{id}` if possible, or `/` if
+ * the user does not have permission to access `organizations/{id}`.
+ */
 @Injectable({
   providedIn: "root",
 })
