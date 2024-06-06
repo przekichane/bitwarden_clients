@@ -1,5 +1,7 @@
 import { EncString } from "@bitwarden/common/platform/models/domain/enc-string";
 
+import { RotateableKeySet } from "../../../../../auth/src/common/models";
+
 export class WebauthnRotateCredentialRequest {
   id: string;
   encryptedPublicKey: EncString;
@@ -9,5 +11,16 @@ export class WebauthnRotateCredentialRequest {
     this.id = id;
     this.encryptedPublicKey = encryptedPublicKey;
     this.encryptedUserKey = encryptedUserKey;
+  }
+
+  static fromRotateableKeyset(
+    id: string,
+    keyset: RotateableKeySet,
+  ): WebauthnRotateCredentialRequest {
+    return new WebauthnRotateCredentialRequest(
+      id,
+      keyset.encryptedPublicKey,
+      keyset.encryptedPrivateKey,
+    );
   }
 }

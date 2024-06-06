@@ -29,4 +29,31 @@ export class RotateableKeySetService {
     const encryptedPublicKey = await this.encryptService.encrypt(rawPublicKey, userKey);
     return new RotateableKeySet(encryptedUserKey, encryptedPublicKey, encryptedPrivateKey);
   }
+
+  /**
+   * Rotates the current user's `UserKey` and updates the provided `RotateableKeySet` with the new keys.
+   *
+   * @param keySet The current `RotateableKeySet` for the user
+   * @returns The updated `RotateableKeySet` with the new `UserKey`
+   */
+  async rotateKeySet<ExternalKey extends SymmetricCryptoKey>(
+    keySet: RotateableKeySet<ExternalKey>,
+    oldUserKey: SymmetricCryptoKey,
+    newUserKey: SymmetricCryptoKey,
+  ): Promise<RotateableKeySet<ExternalKey>> {
+    const publicKey = await this.encryptService.decryptToBytes(
+      keySet.encryptedPublicKey,
+      oldUserKey,
+    );
+    const newEncryptedPublicKey = await this.encryptService.encrypt(publicKey, newUserKey);
+    const newEncryptedUserKey = await this.encryptService.rsaEncrypt(newUserKey.key, publicKey);
+
+    const newRotateableKeySet = new RotateableKeySet<ExternalKey>(
+      newEncryptedUserKey,
+      newEncryptedPublicKey,
+      keySet.encryptedPrivateKey,
+    );
+
+    return newRotateableKeySet;
+  }
 }

@@ -9,7 +9,7 @@ import { WebauthnRotateCredentialRequest } from "@bitwarden/common/auth/models/r
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { EncryptService } from "@bitwarden/common/platform/abstractions/encrypt.service";
 import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { EncString, EncryptedString } from "@bitwarden/common/platform/models/domain/enc-string";
+import { EncryptedString } from "@bitwarden/common/platform/models/domain/enc-string";
 import { SendService } from "@bitwarden/common/tools/send/services/send.service.abstraction";
 import { UserKey } from "@bitwarden/common/types/key";
 import { CipherService } from "@bitwarden/common/vault/abstractions/cipher.service";
@@ -19,6 +19,7 @@ import { CipherWithIdRequest } from "@bitwarden/common/vault/models/request/ciph
 import { FolderWithIdRequest } from "@bitwarden/common/vault/models/request/folder-with-id.request";
 
 import { OrganizationUserResetPasswordService } from "../../admin-console/organizations/members/services/organization-user-reset-password/organization-user-reset-password.service";
+import { RotateableKeySetService } from "../core/services/rotateable-key-set.service";
 import { WebAuthnLoginAdminApiService } from "../core/services/webauthn-login/webauthn-login-admin-api.service";
 import { EmergencyAccessService } from "../emergency-access";
 
@@ -43,6 +44,7 @@ export class UserKeyRotationService {
     private kdfConfigService: KdfConfigService,
     private syncService: SyncService,
     private webauthnLoginAdminApiService: WebAuthnLoginAdminApiService,
+    private rotateableKeySetService: RotateableKeySetService,
   ) {}
 
   /**
@@ -150,26 +152,23 @@ export class UserKeyRotationService {
     oldUserKey: UserKey,
     newUserKey: UserKey,
   ): Promise<WebauthnRotateCredentialRequest[]> {
-    const keysToRotate = (await this.webauthnLoginAdminApiService.getCredentials()).data.filter(
-      (c) => c.encryptedUserKey,
+    return Promise.all(
+      (await this.webauthnLoginAdminApiService.getCredentials()).data
+        .filter((c) => c.hasPrfKeyset())
+        .map(async (response) => {
+          const keyset = response.getRotateableKeyset();
+          const rotatedKeyset = await this.rotateableKeySetService.rotateKeySet(
+            keyset,
+            oldUserKey,
+            newUserKey,
+          );
+          const request = new WebauthnRotateCredentialRequest(
+            response.id,
+            rotatedKeyset.encryptedPublicKey,
+            rotatedKeyset.encryptedUserKey,
+          );
+          return request;
+        }),
     );
-    const rotatedKeys: WebauthnRotateCredentialRequest[] = [];
-
-    for (const key of keysToRotate) {
-      const publicKeyEncString = new EncString(key.encryptedPublicKey);
-      const publicKey = await this.encryptService.decryptToBytes(publicKeyEncString, oldUserKey);
-
-      const newEncryptedPublicKey = await this.encryptService.encrypt(publicKey, newUserKey);
-      const newEncryptedUserKey = await this.encryptService.rsaEncrypt(newUserKey.key, publicKey);
-
-      const request = new WebauthnRotateCredentialRequest(
-        key.id,
-        newEncryptedPublicKey,
-        newEncryptedUserKey,
-      );
-      rotatedKeys.push(request);
-    }
-
-    return rotatedKeys;
   }
 }
