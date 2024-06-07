@@ -14,14 +14,14 @@ import { InputPasswordComponent } from "@bitwarden/auth/angular";
 export class SetPasswordSecondaryComponent implements OnInit {
   private destroy$ = new Subject<void>();
 
-  orgId: string;
+  orgName: string;
 
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((qParams) => {
-      if (qParams.orgId) {
-        this.orgId = qParams.orgId;
+      if (qParams.orgName) {
+        this.orgName = qParams.orgName;
       }
     });
   }

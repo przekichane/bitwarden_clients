@@ -1,24 +1,20 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import { of } from "rxjs";
 
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
-import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
 
 import { I18nMockService } from "../../../../components/src/utils/i18n-mock.service";
 
+import { mockZXCVBNResult, mockMasterPasswordPolicyOptions$ } from "./input-password-mocks";
 import { InputPasswordComponent } from "./input-password.component";
 
 class MockPolicyService implements Partial<PolicyService> {
-  masterPasswordPolicyOptions$ = () =>
-    of({
-      minComplexity: 3,
-      minLength: 10,
-      requireUpper: true,
-      requireLower: true,
-      requireNumbers: true,
-      requireSpecial: true,
-    } as MasterPasswordPolicyOptions);
+  masterPasswordPolicyOptions$ = () => mockMasterPasswordPolicyOptions$;
+}
+
+class MockPasswordStrengthService implements Partial<PasswordStrengthServiceAbstraction> {
+  getPasswordStrength = () => mockZXCVBNResult;
 }
 
 export default {
@@ -31,6 +27,10 @@ export default {
         {
           provide: PolicyService,
           useClass: MockPolicyService,
+        },
+        {
+          provide: PasswordStrengthServiceAbstraction,
+          useClass: MockPasswordStrengthService,
         },
         {
           provide: I18nService,
