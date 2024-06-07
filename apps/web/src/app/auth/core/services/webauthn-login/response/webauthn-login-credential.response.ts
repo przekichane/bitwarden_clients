@@ -30,7 +30,7 @@ export class WebauthnLoginCredentialResponse extends BaseResponse {
     );
   }
 
-  async hasPrfKeyset(): Promise<boolean> {
+  hasPrfKeyset(): boolean {
     return this.encryptedUserKey != null && this.encryptedPublicKey != null;
   }
 }
