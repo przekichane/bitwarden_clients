@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
-import { Subject, takeUntil } from "rxjs";
+import { ActivatedRoute, Router } from "@angular/router";
+import { firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { InputPasswordComponent } from "@bitwarden/auth/angular";
@@ -12,17 +12,22 @@ import { InputPasswordComponent } from "@bitwarden/auth/angular";
   imports: [InputPasswordComponent, JslibModule],
 })
 export class SetPasswordSecondaryComponent implements OnInit {
-  private destroy$ = new Subject<void>();
-
+  orgId: string;
   orgName: string;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+  ) {}
 
-  ngOnInit(): void {
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((qParams) => {
-      if (qParams.orgName) {
-        this.orgName = qParams.orgName;
-      }
-    });
+  async ngOnInit() {
+    const qParams = await firstValueFrom(this.route.queryParams);
+
+    if (qParams.orgName != null && qParams.orgId != null) {
+      await this.router.navigate(["/"]);
+    }
+
+    this.orgName = qParams.orgName;
+    this.orgId = qParams.orgId;
   }
 }

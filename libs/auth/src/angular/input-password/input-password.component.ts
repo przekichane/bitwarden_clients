@@ -40,14 +40,13 @@ import { PasswordCalloutComponent } from "../password-callout/password-callout.c
 export class InputPasswordComponent implements OnInit {
   @Input() contentTitle: string;
   @Input() buttonText: string;
+  @Input() orgId: string;
   @Input() orgName: string;
 
-  policy: MasterPasswordPolicyOptions;
-
   minPasswordLength = Utils.minimumPasswordLength;
-
   minHintLength = 0;
   maxHintLength = 50;
+  policy: MasterPasswordPolicyOptions;
 
   passwordForm = this.formBuilder.group(
     {
