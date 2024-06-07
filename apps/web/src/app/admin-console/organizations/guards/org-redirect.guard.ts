@@ -1,5 +1,10 @@
-import { Injectable } from "@angular/core";
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
+import { inject } from "@angular/core";
+import {
+  ActivatedRouteSnapshot,
+  CanActivateFn,
+  Router,
+  RouterStateSnapshot,
+} from "@angular/router";
 
 import {
   canAccessOrgAdmin,
@@ -13,17 +18,12 @@ import {
  * tree returned will redirect to `/organizations/{id}` if possible, or `/` if
  * the user does not have permission to access `organizations/{id}`.
  */
-@Injectable({
-  providedIn: "root",
-})
-export class OrganizationRedirectGuard implements CanActivate {
-  constructor(
-    private router: Router,
-    private organizationService: OrganizationService,
-  ) {}
+export function organizationRedirectGuard(): CanActivateFn {
+  return async (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+    const router = inject(Router);
+    const organizationService = inject(OrganizationService);
 
-  async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    const org = await this.organizationService.get(route.params.organizationId);
+    const org = await organizationService.get(route.params.organizationId);
 
     const customRedirect = route.data?.autoRedirectCallback;
     if (customRedirect) {
@@ -31,13 +31,13 @@ export class OrganizationRedirectGuard implements CanActivate {
       if (typeof redirectPath === "string") {
         redirectPath = [redirectPath];
       }
-      return this.router.createUrlTree([state.url, ...redirectPath]);
+      return router.createUrlTree([state.url, ...redirectPath]);
     }
 
     if (org != null && canAccessOrgAdmin(org)) {
-      return this.router.createUrlTree(["/organizations", org.id]);
+      return router.createUrlTree(["/organizations", org.id]);
     }
 
-    return this.router.createUrlTree(["/"]);
-  }
+    return router.createUrlTree(["/"]);
+  };
 }

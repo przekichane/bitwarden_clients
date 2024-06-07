@@ -8,7 +8,7 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { OrganizationUserType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 
-import { OrganizationRedirectGuard } from "./org-redirect.guard";
+import { organizationRedirectGuard } from "./org-redirect.guard";
 
 @Component({
   template: "<h1>This is the home screen!</h1>",
@@ -66,12 +66,12 @@ describe("Organization Redirect Guard", () => {
           {
             path: "organizations/:organizationId/noCallback",
             component: AdminConsoleComponent,
-            canActivate: [OrganizationRedirectGuard],
+            canActivate: [organizationRedirectGuard()],
           },
           {
             path: "organizations/:organizationId/stringCallback",
             component: AdminConsoleComponent,
-            canActivate: [OrganizationRedirectGuard],
+            canActivate: [organizationRedirectGuard()],
             data: {
               autoRedirectCallback: () => "success",
             },
@@ -79,7 +79,7 @@ describe("Organization Redirect Guard", () => {
           {
             path: "organizations/:organizationId/arrayCallback",
             component: AdminConsoleComponent,
-            canActivate: [OrganizationRedirectGuard],
+            canActivate: [organizationRedirectGuard()],
             data: {
               autoRedirectCallback: () => ["exponential", "success"],
             },
