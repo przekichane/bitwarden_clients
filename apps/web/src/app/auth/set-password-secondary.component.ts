@@ -23,11 +23,11 @@ export class SetPasswordSecondaryComponent implements OnInit {
   async ngOnInit() {
     const qParams = await firstValueFrom(this.route.queryParams);
 
-    if (qParams.orgName != null && qParams.orgId != null) {
+    if (qParams.orgName == null && qParams.identifier == null) {
       await this.router.navigate(["/"]);
     }
 
     this.orgName = qParams.orgName;
-    this.orgId = qParams.orgId;
+    this.orgId = qParams.identifier; // from SsoComponent handleChangePasswordRequired()
   }
 }

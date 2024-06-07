@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
 import { Subject, takeUntil } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
+import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
@@ -79,13 +80,16 @@ export class InputPasswordComponent implements OnInit {
     private formBuilder: FormBuilder,
     private i18nService: I18nService,
     private policyService: PolicyService,
+    private policyApiService: PolicyApiServiceAbstraction,
   ) {}
 
   async ngOnInit() {
-    this.policyService
-      .masterPasswordPolicyOptions$()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((masterPasswordPolicyOptions) => (this.policy ??= masterPasswordPolicyOptions));
+    // this.policyService
+    //   .masterPasswordPolicyOptions$()
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe((masterPasswordPolicyOptions) => (this.policy ??= masterPasswordPolicyOptions));
+
+    this.policy = await this.policyApiService.getMasterPasswordPolicyOptsForOrgUser(this.orgId);
   }
 
   submit() {}
