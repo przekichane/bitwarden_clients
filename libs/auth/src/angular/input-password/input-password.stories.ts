@@ -5,10 +5,7 @@ import { PolicyService } from "@bitwarden/common/admin-console/abstractions/poli
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
-
-import { DialogService } from "../../../../components/src/dialog";
-import { ToastService } from "../../../../components/src/toast";
-import { I18nMockService } from "../../../../components/src/utils/i18n-mock.service";
+import { DialogService, ToastService, I18nMockService } from "@bitwarden/components";
 
 import {
   mockZXCVBNResult,
@@ -17,47 +14,47 @@ import {
 } from "./input-password-mocks";
 import { InputPasswordComponent } from "./input-password.component";
 
-class MockAccountService implements Partial<AccountService> {
-  activeAccount$ = mockActiveAccount$;
-}
-
-class MockPolicyService implements Partial<PolicyService> {
-  masterPasswordPolicyOptions$ = () => mockMasterPasswordPolicyOptions$;
-}
-
-class MockPasswordStrengthService implements Partial<PasswordStrengthServiceAbstraction> {
-  getPasswordStrength = () => mockZXCVBNResult;
-}
-
-class MockAuditService implements Partial<AuditService> {
-  passwordLeaked = () => Promise.resolve(0);
-}
-
-class MockDialogService implements Partial<DialogService> {
-  openSimpleDialog = () => Promise.resolve(true);
-}
-
-class MockToastService implements Partial<ToastService> {
-  showToast = () => undefined as any;
-}
-
 export default {
   title: "Auth/Input Password",
   component: InputPasswordComponent,
   decorators: [
     moduleMetadata({
       providers: [
-        { provide: AccountService, useClass: MockAccountService },
-        { provide: AuditService, useClass: MockAuditService },
-        { provide: DialogService, useClass: MockDialogService },
-        { provide: ToastService, useClass: MockToastService },
+        {
+          provide: AccountService,
+          useValue: {
+            activeAccount$: mockActiveAccount$,
+          } as Partial<AccountService>,
+        },
+        {
+          provide: AuditService,
+          useValue: {
+            passwordLeaked: () => Promise.resolve(1),
+          } as Partial<AuditService>,
+        },
+        {
+          provide: DialogService,
+          useValue: {
+            openSimpleDialog: () => Promise.resolve(true),
+          } as Partial<DialogService>,
+        },
         {
           provide: PolicyService,
-          useClass: MockPolicyService,
+          useValue: {
+            masterPasswordPolicyOptions$: () => mockMasterPasswordPolicyOptions$,
+          } as Partial<PolicyService>,
         },
         {
           provide: PasswordStrengthServiceAbstraction,
-          useClass: MockPasswordStrengthService,
+          useValue: {
+            getPasswordStrength: () => mockZXCVBNResult,
+          } as Partial<PasswordStrengthServiceAbstraction>,
+        },
+        {
+          provide: ToastService,
+          useValue: {
+            showToast: () => undefined,
+          } as Partial<ToastService>,
         },
         {
           provide: I18nService,
