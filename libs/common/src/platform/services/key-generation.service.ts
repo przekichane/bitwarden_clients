@@ -1,14 +1,8 @@
-import { KdfConfig } from "../../auth/models/domain/kdf-config";
+import { Argon2KdfConfig, KdfConfig, PBKDF2KdfConfig } from "../../auth/models/domain/kdf-config";
 import { CsprngArray } from "../../types/csprng";
 import { CryptoFunctionService } from "../abstractions/crypto-function.service";
 import { KeyGenerationService as KeyGenerationServiceAbstraction } from "../abstractions/key-generation.service";
-import {
-  ARGON2_ITERATIONS,
-  ARGON2_MEMORY,
-  ARGON2_PARALLELISM,
-  KdfType,
-  PBKDF2_ITERATIONS,
-} from "../enums";
+import { KdfType } from "../enums";
 import { Utils } from "../misc/utils";
 import { SymmetricCryptoKey } from "../models/domain/symmetric-crypto-key";
 
@@ -51,21 +45,21 @@ export class KeyGenerationService implements KeyGenerationServiceAbstraction {
     let key: Uint8Array = null;
     if (kdfConfig.kdfType == null || kdfConfig.kdfType === KdfType.PBKDF2_SHA256) {
       if (kdfConfig.iterations == null) {
-        kdfConfig.iterations = PBKDF2_ITERATIONS.defaultValue;
+        kdfConfig.iterations = PBKDF2KdfConfig.PBKDF2_ITERATIONS.defaultValue;
       }
 
       key = await this.cryptoFunctionService.pbkdf2(password, salt, "sha256", kdfConfig.iterations);
     } else if (kdfConfig.kdfType == KdfType.Argon2id) {
       if (kdfConfig.iterations == null) {
-        kdfConfig.iterations = ARGON2_ITERATIONS.defaultValue;
+        kdfConfig.iterations = Argon2KdfConfig.ARGON2_ITERATIONS.defaultValue;
       }
 
       if (kdfConfig.memory == null) {
-        kdfConfig.memory = ARGON2_MEMORY.defaultValue;
+        kdfConfig.memory = Argon2KdfConfig.ARGON2_MEMORY.defaultValue;
       }
 
       if (kdfConfig.parallelism == null) {
-        kdfConfig.parallelism = ARGON2_PARALLELISM.defaultValue;
+        kdfConfig.parallelism = Argon2KdfConfig.ARGON2_PARALLELISM.defaultValue;
       }
 
       const saltHash = await this.cryptoFunctionService.hash(salt, "sha256");
