@@ -39,9 +39,10 @@ export class EnrollMasterPasswordReset {
       verificationType: {
         type: "custom",
         verificationFn: async (secret: VerificationWithSecret) => {
-          const request = (await userVerificationService.buildRequest(
-            secret,
-          )) as OrganizationUserResetPasswordEnrollmentRequest;
+          const request =
+            await userVerificationService.buildRequest<OrganizationUserResetPasswordEnrollmentRequest>(
+              secret,
+            );
           request.resetPasswordKey = await resetPasswordService.buildRecoveryKey(
             data.organization.id,
           );

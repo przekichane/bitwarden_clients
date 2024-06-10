@@ -153,9 +153,7 @@ export class UserVerificationDialogComponent {
    *     // Pass in a function that will be used to validate the input of the
    *     // verification dialog, returning true when finished.
    *     verificationFn: async (secret: VerificationWithSecret) => {
-   *       const request = (await userVerificationService.buildRequest(
-   *         secret,
-   *       )) as CustomRequestType;
+   *       const request = await userVerificationService.buildRequest<CustomRequestType>(secret);
    *
    *      // ... Do something with the custom request type
    *
