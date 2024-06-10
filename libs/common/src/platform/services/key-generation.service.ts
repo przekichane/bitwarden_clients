@@ -45,21 +45,21 @@ export class KeyGenerationService implements KeyGenerationServiceAbstraction {
     let key: Uint8Array = null;
     if (kdfConfig.kdfType == null || kdfConfig.kdfType === KdfType.PBKDF2_SHA256) {
       if (kdfConfig.iterations == null) {
-        kdfConfig.iterations = PBKDF2KdfConfig.PBKDF2_ITERATIONS.defaultValue;
+        kdfConfig.iterations = PBKDF2KdfConfig.ITERATIONS.defaultValue;
       }
 
       key = await this.cryptoFunctionService.pbkdf2(password, salt, "sha256", kdfConfig.iterations);
     } else if (kdfConfig.kdfType == KdfType.Argon2id) {
       if (kdfConfig.iterations == null) {
-        kdfConfig.iterations = Argon2KdfConfig.ARGON2_ITERATIONS.defaultValue;
+        kdfConfig.iterations = Argon2KdfConfig.ITERATIONS.defaultValue;
       }
 
       if (kdfConfig.memory == null) {
-        kdfConfig.memory = Argon2KdfConfig.ARGON2_MEMORY.defaultValue;
+        kdfConfig.memory = Argon2KdfConfig.MEMORY.defaultValue;
       }
 
       if (kdfConfig.parallelism == null) {
-        kdfConfig.parallelism = Argon2KdfConfig.ARGON2_PARALLELISM.defaultValue;
+        kdfConfig.parallelism = Argon2KdfConfig.PARALLELISM.defaultValue;
       }
 
       const saltHash = await this.cryptoFunctionService.hash(salt, "sha256");

@@ -242,7 +242,7 @@ describe("VaultExportService", () => {
       });
 
       it("specifies kdfIterations", () => {
-        expect(exportObject.kdfIterations).toEqual(PBKDF2KdfConfig.PBKDF2_ITERATIONS.defaultValue);
+        expect(exportObject.kdfIterations).toEqual(PBKDF2KdfConfig.ITERATIONS.defaultValue);
       });
 
       it("has kdfType", () => {

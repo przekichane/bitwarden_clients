@@ -201,7 +201,7 @@ export class VaultBannersService {
     const kdfConfig = await this.kdfConfigService.getKdfConfig();
     return (
       kdfConfig.kdfType === KdfType.PBKDF2_SHA256 &&
-      kdfConfig.iterations < PBKDF2KdfConfig.PBKDF2_ITERATIONS.defaultValue
+      kdfConfig.iterations < PBKDF2KdfConfig.ITERATIONS.defaultValue
     );
   }
 

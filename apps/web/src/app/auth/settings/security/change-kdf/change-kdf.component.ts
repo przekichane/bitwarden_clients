@@ -22,10 +22,10 @@ export class ChangeKdfComponent implements OnInit {
   kdfOptions: any[] = [];
 
   // Default values for template
-  protected PBKDF2_ITERATIONS = PBKDF2KdfConfig.PBKDF2_ITERATIONS;
-  protected ARGON2_ITERATIONS = Argon2KdfConfig.ARGON2_ITERATIONS;
-  protected ARGON2_MEMORY = Argon2KdfConfig.ARGON2_MEMORY;
-  protected ARGON2_PARALLELISM = Argon2KdfConfig.ARGON2_PARALLELISM;
+  protected PBKDF2_ITERATIONS = PBKDF2KdfConfig.ITERATIONS;
+  protected ARGON2_ITERATIONS = Argon2KdfConfig.ITERATIONS;
+  protected ARGON2_MEMORY = Argon2KdfConfig.MEMORY;
+  protected ARGON2_PARALLELISM = Argon2KdfConfig.PARALLELISM;
 
   constructor(
     private dialogService: DialogService,
