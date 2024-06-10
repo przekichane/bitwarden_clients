@@ -8,6 +8,8 @@ import {
   tdeDecryptionRequiredGuard,
   unauthGuardFn,
 } from "@bitwarden/angular/auth/guards";
+import { canAccessFeature } from "@bitwarden/angular/platform/guard/feature-flag.guard";
+import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 
 import { fido2AuthGuard } from "../auth/guards/fido2-auth.guard";
 import { AccountSwitcherComponent } from "../auth/popup/account-switching/account-switcher.component";
@@ -348,6 +350,7 @@ const routes: Routes = [
   {
     path: "assign-collections",
     component: AssignCollections,
+    canActivate: [canAccessFeature(FeatureFlag.ExtensionRefresh, true, "/")],
     data: { state: "assign-collections" },
   },
   ...extensionRefreshSwap(AboutPageComponent, AboutPageV2Component, {
