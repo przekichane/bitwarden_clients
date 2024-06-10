@@ -5,8 +5,10 @@
   attacker.
 </p>
 <p bitTypography="body1">
-  For older devices, setting your KDF too high may lead to performance issues. Increase the value in
-  {{ isPBKDF2(kdfConfig) ? "increments of 100,000" : "small increments" }} and test your devices.
+  {{
+    "kdfToHighWarningIncreaseInIncrements"
+      | i18n: (isPBKDF2(kdfConfig) ? ("incrementsOf100,000" | i18n) : ("smallIncrements" | i18n))
+  }}
 </p>
 <form [formGroup]="formGroup" autocomplete="off">
   <div class="tw-grid tw-grid-cols-12 tw-gap-4">
@@ -67,7 +69,7 @@
             [min]="PBKDF2_ITERATIONS.min"
             [max]="PBKDF2_ITERATIONS.max"
           />
-          <bit-hint>We recommend 600,000 or more</bit-hint>
+          <bit-hint>{{ "kdfIterationRecommends" | i18n }}</bit-hint>
         </bit-form-field>
         <ng-container *ngIf="isArgon2(kdfConfig)">
           <bit-form-field formGroupName="kdfConfig">

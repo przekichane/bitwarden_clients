@@ -1,5 +1,5 @@
 import { Component, OnInit } from "@angular/core";
-import { FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
+import { FormBuilder, FormControl, ValidatorFn, Validators } from "@angular/forms";
 import { Subject, takeUntil } from "rxjs";
 
 import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
@@ -29,24 +29,29 @@ export class ChangeKdfComponent implements OnInit {
   kdfOptions: any[] = [];
   private destroy$ = new Subject<void>();
 
-  protected formGroup = new FormGroup({
+  protected formGroup = this.formBuilder.group({
     kdf: new FormControl(KdfType.PBKDF2_SHA256, [Validators.required]),
-    kdfConfig: new FormGroup({
-      iterations: new FormControl(this.kdfConfig.iterations, [
-        Validators.required,
-        Validators.min(PBKDF2_ITERATIONS.min),
-        Validators.max(PBKDF2_ITERATIONS.max),
-      ]),
-      memory: new FormControl(null, [
-        Validators.required,
-        Validators.min(ARGON2_MEMORY.min),
-        Validators.max(ARGON2_MEMORY.max),
-      ]),
-      parallelism: new FormControl(null, [
-        Validators.required,
-        Validators.min(ARGON2_PARALLELISM.min),
-        Validators.max(ARGON2_PARALLELISM.max),
-      ]),
+    kdfConfig: this.formBuilder.group({
+      iterations: [
+        this.kdfConfig.iterations,
+        [
+          Validators.required,
+          Validators.min(PBKDF2_ITERATIONS.min),
+          Validators.max(PBKDF2_ITERATIONS.max),
+        ],
+      ],
+      memory: [
+        null as number,
+        [Validators.required, Validators.min(ARGON2_MEMORY.min), Validators.max(ARGON2_MEMORY.max)],
+      ],
+      parallelism: [
+        null as number,
+        [
+          Validators.required,
+          Validators.min(ARGON2_PARALLELISM.min),
+          Validators.max(ARGON2_PARALLELISM.max),
+        ],
+      ],
     }),
   });
 
@@ -59,6 +64,7 @@ export class ChangeKdfComponent implements OnInit {
   constructor(
     private dialogService: DialogService,
     private kdfConfigService: KdfConfigService,
+    private formBuilder: FormBuilder,
   ) {
     this.kdfOptions = [
       { name: "PBKDF2 SHA-256", value: KdfType.PBKDF2_SHA256 },
