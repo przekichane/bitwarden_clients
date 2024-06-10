@@ -42,6 +42,7 @@ import { AboutPageV2Component } from "../tools/popup/settings/about-page/about-p
 import { AboutPageComponent } from "../tools/popup/settings/about-page/about-page.component";
 import { MoreFromBitwardenPageV2Component } from "../tools/popup/settings/about-page/more-from-bitwarden-page-v2.component";
 import { MoreFromBitwardenPageComponent } from "../tools/popup/settings/about-page/more-from-bitwarden-page.component";
+import { ExportBrowserV2Component } from "../tools/popup/settings/export/export-browser-v2.component";
 import { ExportBrowserComponent } from "../tools/popup/settings/export/export-browser.component";
 import { ImportBrowserV2Component } from "../tools/popup/settings/import/import-browser-v2.component";
 import { ImportBrowserComponent } from "../tools/popup/settings/import/import-browser.component";
@@ -58,6 +59,7 @@ import { VaultFilterComponent } from "../vault/popup/components/vault/vault-filt
 import { VaultItemsComponent } from "../vault/popup/components/vault/vault-items.component";
 import { VaultV2Component } from "../vault/popup/components/vault/vault-v2.component";
 import { ViewComponent } from "../vault/popup/components/vault/view.component";
+import { AddEditV2Component } from "../vault/popup/components/vault-v2/add-edit/add-edit-v2.component";
 import { AssignCollections } from "../vault/popup/components/vault-v2/assign-collections/assign-collections.component";
 import { AppearanceComponent } from "../vault/popup/settings/appearance.component";
 import { FolderAddEditComponent } from "../vault/popup/settings/folder-add-edit.component";
@@ -197,20 +199,18 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { state: "cipher-password-history" },
   },
-  {
+  ...extensionRefreshSwap(AddEditComponent, AddEditV2Component, {
     path: "add-cipher",
-    component: AddEditComponent,
     canActivate: [AuthGuard, debounceNavigationGuard()],
     data: { state: "add-cipher" },
     runGuardsAndResolvers: "always",
-  },
-  {
+  }),
+  ...extensionRefreshSwap(AddEditComponent, AddEditV2Component, {
     path: "edit-cipher",
-    component: AddEditComponent,
     canActivate: [AuthGuard, debounceNavigationGuard()],
     data: { state: "edit-cipher" },
     runGuardsAndResolvers: "always",
-  },
+  }),
   {
     path: "share-cipher",
     component: ShareComponent,
@@ -246,12 +246,11 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     data: { state: "import" },
   }),
-  {
+  ...extensionRefreshSwap(ExportBrowserComponent, ExportBrowserV2Component, {
     path: "export",
-    component: ExportBrowserComponent,
     canActivate: [AuthGuard],
     data: { state: "export" },
-  },
+  }),
   {
     path: "autofill",
     component: AutofillComponent,
