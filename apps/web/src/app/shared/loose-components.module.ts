@@ -20,7 +20,6 @@ import { ProvidersComponent } from "../admin-console/providers/providers.compone
 import { VerifyRecoverDeleteProviderComponent } from "../admin-console/providers/verify-recover-delete-provider.component";
 import { SponsoredFamiliesComponent } from "../admin-console/settings/sponsored-families.component";
 import { SponsoringOrgRowComponent } from "../admin-console/settings/sponsoring-org-row.component";
-import { AcceptOrganizationComponent } from "../auth/accept-organization.component";
 import { HintComponent } from "../auth/hint.component";
 import { LockComponent } from "../auth/lock.component";
 import { RecoverDeleteComponent } from "../auth/recover-delete.component";
@@ -29,11 +28,11 @@ import { RegisterFormModule } from "../auth/register-form/register-form.module";
 import { RemovePasswordComponent } from "../auth/remove-password.component";
 import { SetPasswordComponent } from "../auth/set-password.component";
 import { AccountComponent } from "../auth/settings/account/account.component";
-import { ChangeAvatarComponent } from "../auth/settings/account/change-avatar.component";
+import { ChangeAvatarDialogComponent } from "../auth/settings/account/change-avatar-dialog.component";
 import { ChangeEmailComponent } from "../auth/settings/account/change-email.component";
 import { DangerZoneComponent } from "../auth/settings/account/danger-zone.component";
 import { DeauthorizeSessionsComponent } from "../auth/settings/account/deauthorize-sessions.component";
-import { DeleteAccountComponent } from "../auth/settings/account/delete-account.component";
+import { DeleteAccountDialogComponent } from "../auth/settings/account/delete-account-dialog.component";
 import { ProfileComponent } from "../auth/settings/account/profile.component";
 import { EmergencyAccessAttachmentsComponent } from "../auth/settings/emergency-access/attachments/emergency-access-attachments.component";
 import { EmergencyAccessConfirmComponent } from "../auth/settings/emergency-access/confirm/emergency-access-confirm.component";
@@ -120,7 +119,6 @@ import { SharedModule } from "./shared.module";
   ],
   declarations: [
     AcceptFamilySponsorshipComponent,
-    AcceptOrganizationComponent,
     AccountComponent,
     AddEditComponent,
     AddEditCustomFieldsComponent,
@@ -130,7 +128,7 @@ import { SharedModule } from "./shared.module";
     ChangeEmailComponent,
     CollectionsComponent,
     DeauthorizeSessionsComponent,
-    DeleteAccountComponent,
+    DeleteAccountDialogComponent,
     DomainRulesComponent,
     EmergencyAccessAddEditComponent,
     EmergencyAccessAttachmentsComponent,
@@ -158,7 +156,7 @@ import { SharedModule } from "./shared.module";
     PreferencesComponent,
     PremiumBadgeComponent,
     ProfileComponent,
-    ChangeAvatarComponent,
+    ChangeAvatarDialogComponent,
     ProvidersComponent,
     PurgeVaultComponent,
     RecoverDeleteComponent,
@@ -193,7 +191,6 @@ import { SharedModule } from "./shared.module";
   exports: [
     UserVerificationModule,
     PremiumBadgeComponent,
-    AcceptOrganizationComponent,
     AccountComponent,
     AddEditComponent,
     AddEditCustomFieldsComponent,
@@ -203,7 +200,7 @@ import { SharedModule } from "./shared.module";
     ChangeEmailComponent,
     CollectionsComponent,
     DeauthorizeSessionsComponent,
-    DeleteAccountComponent,
+    DeleteAccountDialogComponent,
     DomainRulesComponent,
     DynamicAvatarComponent,
     EmergencyAccessAddEditComponent,
@@ -233,7 +230,7 @@ import { SharedModule } from "./shared.module";
     PreferencesComponent,
     PremiumBadgeComponent,
     ProfileComponent,
-    ChangeAvatarComponent,
+    ChangeAvatarDialogComponent,
     ProvidersComponent,
     PurgeVaultComponent,
     RecoverDeleteComponent,
