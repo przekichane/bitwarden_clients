@@ -224,6 +224,20 @@ const routes: Routes = [
                 (mod) => mod.AcceptEmergencyComponent,
               ),
           },
+        ],
+      },
+      {
+        path: "hint",
+        canActivate: [unauthGuardFn()],
+        children: [
+          {
+            path: "",
+            component: HintComponent,
+            data: {
+              pageTitle: "passwordHint",
+              titleId: "passwordHint",
+            } satisfies DataProperties & AnonLayoutWrapperData,
+          },
           {
             path: "",
             component: EnvironmentSelectorComponent,
@@ -340,30 +354,6 @@ const routes: Routes = [
     path: "organizations",
     loadChildren: () =>
       import("./admin-console/organizations/organization.module").then((m) => m.OrganizationModule),
-  },
-  {
-    path: "",
-    component: AnonLayoutWrapperComponent,
-    children: [
-      {
-        path: "hint",
-        children: [
-          {
-            path: "",
-            component: HintComponent,
-            canActivate: [unauthGuardFn()],
-            data: {
-              titleId: "passwordHint",
-            } satisfies DataProperties,
-          },
-          {
-            path: "",
-            component: EnvironmentSelectorComponent,
-            outlet: "environment-selector",
-          },
-        ],
-      },
-    ],
   },
 ];
 
