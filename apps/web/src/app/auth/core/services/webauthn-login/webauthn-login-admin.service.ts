@@ -290,10 +290,10 @@ export class WebauthnLoginAdminService {
     newUserKey: UserKey,
   ): Promise<WebauthnRotateCredentialRequest[]> {
     if (!oldUserKey) {
-      throw new Error("oldUserKey is required for webauthn key rotation");
+      throw new Error("oldUserKey is required");
     }
     if (!newUserKey) {
-      throw new Error("newUserKey is required for webauthn key rotation");
+      throw new Error("newUserKey is required");
     }
 
     return Promise.all(
