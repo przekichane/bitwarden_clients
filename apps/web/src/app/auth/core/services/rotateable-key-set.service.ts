@@ -41,6 +41,17 @@ export class RotateableKeySetService {
     oldUserKey: SymmetricCryptoKey,
     newUserKey: SymmetricCryptoKey,
   ): Promise<RotateableKeySet<ExternalKey>> {
+    // validate parameters
+    if (!keySet) {
+      throw new Error("failed to rotate key set: keySet is required");
+    }
+    if (!oldUserKey) {
+      throw new Error("failed to rotate key set: oldUserKey is required");
+    }
+    if (!newUserKey) {
+      throw new Error("failed to rotate key set: newUserKey is required");
+    }
+
     const publicKey = await this.encryptService.decryptToBytes(
       keySet.encryptedPublicKey,
       oldUserKey,
