@@ -1,13 +1,25 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 
+import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
+import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
+import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
 
+import { DialogService } from "../../../../components/src/dialog";
 import { I18nMockService } from "../../../../components/src/utils/i18n-mock.service";
 
-import { mockZXCVBNResult, mockMasterPasswordPolicyOptions$ } from "./input-password-mocks";
+import {
+  mockZXCVBNResult,
+  mockMasterPasswordPolicyOptions$,
+  mockActiveAccount$,
+} from "./input-password-mocks";
 import { InputPasswordComponent } from "./input-password.component";
+
+class MockAccountService implements Partial<AccountService> {
+  activeAccount$ = mockActiveAccount$;
+}
 
 class MockPolicyService implements Partial<PolicyService> {
   masterPasswordPolicyOptions$ = () => mockMasterPasswordPolicyOptions$;
@@ -17,13 +29,28 @@ class MockPasswordStrengthService implements Partial<PasswordStrengthServiceAbst
   getPasswordStrength = () => mockZXCVBNResult;
 }
 
+class MockAuditService implements Partial<AuditService> {
+  passwordLeaked = () => Promise.resolve(0);
+}
+
+class MockDialogService implements Partial<DialogService> {
+  openSimpleDialog = () => Promise.resolve(true);
+}
+
+class MockPlatformUtilsService implements Partial<PlatformUtilsService> {
+  showToast = () => undefined as any;
+}
+
 export default {
   title: "Auth/Input Password",
   component: InputPasswordComponent,
   decorators: [
     moduleMetadata({
-      imports: [],
       providers: [
+        { provide: AccountService, useClass: MockAccountService },
+        { provide: AuditService, useClass: MockAuditService },
+        { provide: DialogService, useClass: MockDialogService },
+        { provide: PlatformUtilsService, useClass: MockPlatformUtilsService },
         {
           provide: PolicyService,
           useClass: MockPolicyService,

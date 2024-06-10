@@ -2,6 +2,15 @@ import { of } from "rxjs";
 import { ZXCVBNResult, ZXCVBNSequence } from "zxcvbn";
 
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
+import { AccountInfo } from "@bitwarden/common/auth/abstractions/account.service";
+import { UserId } from "@bitwarden/common/types/guid";
+
+export const mockActiveAccount$ = of({
+  id: "5555-5555-5555",
+  email: "jdoe@example.com",
+  emailVerified: true,
+  name: "John Doe",
+} as { id: UserId } & AccountInfo);
 
 export const mockMasterPasswordPolicyOptions$ = of({
   minComplexity: 3,

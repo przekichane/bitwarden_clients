@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { InputPasswordComponent } from "@bitwarden/auth/angular";
+import { InputPasswordComponent, PasswordInput } from "@bitwarden/auth/angular";
 
 @Component({
   standalone: true,
@@ -12,8 +12,8 @@ import { InputPasswordComponent } from "@bitwarden/auth/angular";
   imports: [InputPasswordComponent, JslibModule],
 })
 export class SetPasswordSecondaryComponent implements OnInit {
-  orgId: string;
   orgName: string;
+  orgId: string;
 
   constructor(
     private route: ActivatedRoute,
@@ -23,11 +23,15 @@ export class SetPasswordSecondaryComponent implements OnInit {
   async ngOnInit() {
     const qParams = await firstValueFrom(this.route.queryParams);
 
-    if (qParams.orgName == null && qParams.identifier == null) {
+    if (qParams.identifier == null && qParams.orgId == null) {
       await this.router.navigate(["/"]);
     }
 
-    this.orgName = qParams.orgName;
-    this.orgId = qParams.identifier; // from SsoComponent handleChangePasswordRequired()
+    this.orgName = qParams.identifier; // from SsoComponent handleChangePasswordRequired()
+    this.orgId = qParams.orgId;
+  }
+
+  getPasswordInput(passwordInput: PasswordInput) {
+    console.log(passwordInput);
   }
 }
