@@ -10,9 +10,9 @@
           {{ "twoStepLoginProviderEnabled" | i18n }}
         </app-callout>
         <img class="tw-float-right tw-ml-3 mfaType2" alt="Duo logo" />
-        <strong>{{ "twoFactorDuoIntegrationKey" | i18n }}:</strong> {{ ikey }}
+        <strong>{{ "twoFactorDuoClientId" | i18n }}:</strong> {{ ikey }}
         <br />
-        <strong>{{ "twoFactorDuoSecretKey" | i18n }}:</strong> {{ skey }}
+        <strong>{{ "twoFactorDuoClientSecret" | i18n }}:</strong> {{ skey }}
         <br />
         <strong>{{ "twoFactorDuoApiHostname" | i18n }}:</strong> {{ host }}
       </ng-container>
@@ -20,11 +20,11 @@
         <img class="tw-float-right tw-ml-3 mfaType2" alt="Duo logo" />
         <p bitTypography="body1">{{ "twoFactorDuoDesc" | i18n }}</p>
         <bit-form-field>
-          <bit-label>{{ "twoFactorDuoIntegrationKey" | i18n }}</bit-label>
+          <bit-label>{{ "twoFactorDuoClientId" | i18n }}</bit-label>
           <input bitInput type="text" formControlName="ikey" appInputVerbatim />
         </bit-form-field>
         <bit-form-field>
-          <bit-label>{{ "twoFactorDuoSecretKey" | i18n }}</bit-label>
+          <bit-label>{{ "twoFactorDuoClientSecret" | i18n }}</bit-label>
           <input
             bitInput
             type="password"
