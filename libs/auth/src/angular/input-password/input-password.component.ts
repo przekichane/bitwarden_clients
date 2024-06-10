@@ -8,7 +8,6 @@ import { PolicyService } from "@bitwarden/common/admin-console/abstractions/poli
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import {
   AsyncActionsModule,
@@ -18,6 +17,7 @@ import {
   FormFieldModule,
   IconButtonModule,
   InputModule,
+  ToastService,
 } from "@bitwarden/components";
 
 import { InputsFieldMatch } from "../../../../angular/src/auth/validators/inputs-field-match.validator";
@@ -93,8 +93,8 @@ export class InputPasswordComponent implements OnInit {
     private dialogService: DialogService,
     private formBuilder: FormBuilder,
     private i18nService: I18nService,
-    private platformUtilsService: PlatformUtilsService,
     private policyService: PolicyService,
+    private toastService: ToastService,
   ) {}
 
   async ngOnInit() {
@@ -143,11 +143,12 @@ export class InputPasswordComponent implements OnInit {
         this.masterPasswordPolicy,
       )
     ) {
-      this.platformUtilsService.showToast(
-        "error",
-        this.i18nService.t("errorOccurred"),
-        this.i18nService.t("masterPasswordPolicyRequirementsNotMet"),
-      );
+      this.toastService.showToast({
+        variant: "error",
+        title: this.i18nService.t("errorOccurred"),
+        message: this.i18nService.t("masterPasswordPolicyRequirementsNotMet"),
+      });
+
       return;
     }
 

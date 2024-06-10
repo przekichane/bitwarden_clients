@@ -4,10 +4,10 @@ import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
 
 import { DialogService } from "../../../../components/src/dialog";
+import { ToastService } from "../../../../components/src/toast";
 import { I18nMockService } from "../../../../components/src/utils/i18n-mock.service";
 
 import {
@@ -37,7 +37,7 @@ class MockDialogService implements Partial<DialogService> {
   openSimpleDialog = () => Promise.resolve(true);
 }
 
-class MockPlatformUtilsService implements Partial<PlatformUtilsService> {
+class MockToastService implements Partial<ToastService> {
   showToast = () => undefined as any;
 }
 
@@ -50,7 +50,7 @@ export default {
         { provide: AccountService, useClass: MockAccountService },
         { provide: AuditService, useClass: MockAuditService },
         { provide: DialogService, useClass: MockDialogService },
-        { provide: PlatformUtilsService, useClass: MockPlatformUtilsService },
+        { provide: ToastService, useClass: MockToastService },
         {
           provide: PolicyService,
           useClass: MockPolicyService,
