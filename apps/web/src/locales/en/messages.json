@@ -948,7 +948,7 @@
     "message": "Yubico OTP security key"
   },
   "yubiKeyDesc": {
-    "message": "Insert a YubiKey 4, 5 or NEO device."
+    "message": "Use a YubiKey 4, 5 or NEO device."
   },
   "duoDesc": {
     "message": "Verify with Duo Security using the Duo Mobile app, SMS, phone call, or U2F security key.",
@@ -968,7 +968,7 @@
     "message": "Passkey"
   },
   "webAuthnDesc": {
-    "message": "Use your device's biometrics or insert a FIDO2 security key to access your account."
+    "message": "Use your device's biometrics or use a FIDO2 security key to access your account."
   },
   "webAuthnMigrated": {
     "message": "(Migrated from FIDO)"
