@@ -65,9 +65,9 @@ export type UserVerificationDialogOptions = {
    *
    * Possible values:
    *
-   * - "default": Perform the default validation operation for a given secret
-   *   type. This would, for example, validate master passwords locally but
-   *   OTPs on the server.
+   * - "default": Perform the default validation operation for the determined
+   *   secret type. This would, for example, validate master passwords
+   *   locally but OTPs on the server.
    * - "client": Only do a client-side verification with no possible server
    *   request. Includes local MP verification, PIN, and Biometrics.
    *   **Important:** This option is only for use on desktop and browser
