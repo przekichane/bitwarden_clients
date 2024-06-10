@@ -18,7 +18,7 @@ export const TwoFactorProviders: Partial<Record<TwoFactorProviderType, TwoFactor
       name: null as string,
       description: null as string,
       priority: 1,
-      sort: 1,
+      sort: 2,
       premium: false,
     },
     [TwoFactorProviderType.Yubikey]: {
@@ -26,7 +26,7 @@ export const TwoFactorProviders: Partial<Record<TwoFactorProviderType, TwoFactor
       name: null as string,
       description: null as string,
       priority: 3,
-      sort: 2,
+      sort: 4,
       premium: true,
     },
     [TwoFactorProviderType.Duo]: {
@@ -34,7 +34,7 @@ export const TwoFactorProviders: Partial<Record<TwoFactorProviderType, TwoFactor
       name: "Duo",
       description: null as string,
       priority: 2,
-      sort: 3,
+      sort: 5,
       premium: true,
     },
     [TwoFactorProviderType.OrganizationDuo]: {
@@ -42,7 +42,7 @@ export const TwoFactorProviders: Partial<Record<TwoFactorProviderType, TwoFactor
       name: "Duo (Organization)",
       description: null as string,
       priority: 10,
-      sort: 4,
+      sort: 6,
       premium: false,
     },
     [TwoFactorProviderType.Email]: {
@@ -50,7 +50,7 @@ export const TwoFactorProviders: Partial<Record<TwoFactorProviderType, TwoFactor
       name: null as string,
       description: null as string,
       priority: 0,
-      sort: 6,
+      sort: 1,
       premium: false,
     },
     [TwoFactorProviderType.WebAuthn]: {
@@ -58,7 +58,7 @@ export const TwoFactorProviders: Partial<Record<TwoFactorProviderType, TwoFactor
       name: null as string,
       description: null as string,
       priority: 4,
-      sort: 5,
+      sort: 3,
       premium: false,
     },
   };
