@@ -24,6 +24,13 @@ export class WebauthnLoginCredentialResponse extends BaseResponse {
   }
 
   getRotateableKeyset(): RotateableKeySet {
+    if (!EncString.isSerializedEncString(this.encryptedUserKey)) {
+      throw new Error("Invalid encrypted user key");
+    }
+    if (!EncString.isSerializedEncString(this.encryptedPublicKey)) {
+      throw new Error("Invalid encrypted public key");
+    }
+
     return new RotateableKeySet(
       new EncString(this.encryptedUserKey),
       new EncString(this.encryptedPublicKey),

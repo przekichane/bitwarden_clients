@@ -289,6 +289,13 @@ export class WebauthnLoginAdminService {
     oldUserKey: UserKey,
     newUserKey: UserKey,
   ): Promise<WebauthnRotateCredentialRequest[]> {
+    if (!oldUserKey) {
+      throw new Error("oldUserKey is required for webauthn key rotation");
+    }
+    if (!newUserKey) {
+      throw new Error("newUserKey is required for webauthn key rotation");
+    }
+
     return Promise.all(
       (await this.apiService.getCredentials()).data
         .filter((credential) => credential.hasPrfKeyset())
