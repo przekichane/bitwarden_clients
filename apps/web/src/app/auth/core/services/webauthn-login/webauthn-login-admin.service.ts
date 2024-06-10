@@ -276,6 +276,15 @@ export class WebauthnLoginAdminService {
     this._refresh$.next();
   }
 
+  /**
+   * Creates rotate credential requests for the purpose of user key rotation.
+   * This works by fetching the current webauthn credentials, filtering out the ones that have a PRF keyset,
+   * and rotating these using the rotateable key set service.
+   *
+   * @param oldUserKey The old user key
+   * @param newUserKey The new user key
+   * @returns A promise that returns an array of rotate credential requests when resolved.
+   */
   async rotateWebAuthnKeys(
     oldUserKey: UserKey,
     newUserKey: UserKey,
