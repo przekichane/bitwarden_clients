@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
 
 import { OrganizationService } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
-import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { DialogService } from "@bitwarden/components";
 
 /**
@@ -19,7 +18,6 @@ export class IsPaidOrgGuard implements CanActivate {
   constructor(
     private router: Router,
     private organizationService: OrganizationService,
-    private messagingService: MessagingService,
     private dialogService: DialogService,
   ) {}
 
