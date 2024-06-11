@@ -6,6 +6,7 @@ import { Component, Input } from "@angular/core";
 })
 export class TwoFactorIconComponent {
   @Input() provider: any;
+  @Input() name: string;
 
   constructor() {}
 }
