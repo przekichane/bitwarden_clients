@@ -1617,15 +1617,6 @@
   "twoStepLoginAuthDesc": {
     "message": "Enter your master password to modify two-step login settings."
   },
-  "twoStepAuthenticatorDesc": {
-    "message": "Follow these steps to set up two-step login with an authenticator app:"
-  },
-  "twoStepAuthenticatorDownloadApp": {
-    "message": "Download a two-step authenticator app"
-  },
-  "twoStepAuthenticatorNeedApp": {
-    "message": "Need a two-step authenticator app? Download one of the following"
-  },
   "twoStepAuthenticatorInstructionPrefix": {
     "message": "Download an authenticator app such as"
   },
@@ -1655,18 +1646,6 @@
   },
   "twoStepContinueToBitwardenUrlDesc": {
     "message": "Bitwarden Authenticator allows you to store authenticator keys and generate TOTP codes for 2-step verification flows. Learn more on the bitwarden.com website."
-  },
-  "iosDevices": {
-    "message": "iOS devices"
-  },
-  "androidDevices": {
-    "message": "Android devices"
-  },
-  "windowsDevices": {
-    "message": "Windows devices"
-  },
-  "twoStepAuthenticatorAppsRecommended": {
-    "message": "Download an authenticator app such as $AEGIS$, $2FAS$, or $BITWARDEN_AUTHENTICATOR$."
   },
   "twoStepAuthenticatorScanCode": {
     "message": "Scan the QR code below with your authenticator app or enter the key."
