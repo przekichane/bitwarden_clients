@@ -14,37 +14,58 @@
       <ng-container *ngIf="!enabled">
         <p>
           {{ "twoStepAuthenticatorInstructionPrefix" | i18n }}
-          <a bitLink href="https://getaegis.app" target="_blank" rel="noreferrer">AEGIS</a>
+          <a
+            bitLink
+            target="_blank"
+            rel="noreferrer"
+            (click)="launchExternalUrl('https://getaegis.app')"
+            >Aegis Authenticator</a
+          >
           {{ "twoStepAuthenticatorInstructionInfix1" | i18n }}
-          <a bitLink href="https://2fas.com" target="_blank" rel="noreferrer">2FAS</a>
+          <a
+            bitLink
+            target="_blank"
+            rel="noreferrer"
+            (click)="launchExternalUrl('https://2fas.com')"
+            >2FAS Authenticator</a
+          >
           {{ "twoStepAuthenticatorInstructionInfix2" | i18n }}
           <a
             bitLink
-            href="https://bitwarden.com/products/authenticator/"
             target="_blank"
             rel="noreferrer"
+            (click)="launchBitwardenUrl('https://bitwarden.com/products/authenticator/')"
             >Bitwarden Authenticator</a
           >
           {{ "twoStepAuthenticatorInstructionSuffix" | i18n }}
         </p>
 
         <p class="text-center">
-          <img
-            src="../../../images/download_apple_appstore.svg"
+          <a
             href="https://apps.apple.com/ca/app/bitwarden-authenticator/id6497335175"
-            alt="Download on App Store"
-            max-width="120"
-            height="40"
-          />
+            target="_blank"
+          >
+            <img
+              src="../../../images/download_apple_appstore.svg"
+              alt="Download on App Store"
+              max-width="120"
+              height="40"
+            />
+          </a>
+
           <!--Margin to ensure compliance with google play badge usage guidelines (https://partnermarketinghub.withgoogle.com/brands/google-play/visual-identity/badge-guidelines/#:~:text=The%20clear%20space%20surrounding%20the%20badge%20must%20be%20equal%20to%20one%2Dquarter%20of%20the%20height%20of%20the%20badge.)-->
-          <img
-            src="../../../images/download_google_playstore.svg"
+          <a
             href="https://play.google.com/store/apps/details?id=com.bitwarden.authenticator"
-            alt="Get it on Google Play"
-            max-width="120"
-            height="40"
-            style="margin-left: 10px"
-          />
+            target="_blank"
+          >
+            <img
+              src="../../../images/download_google_playstore.svg"
+              alt="Get it on Google Play"
+              max-width="120"
+              height="40"
+              style="margin-left: 10px"
+            />
+          </a>
         </p>
         {{ "twoStepAuthenticatorScanCode" | i18n }}
       </ng-container>
