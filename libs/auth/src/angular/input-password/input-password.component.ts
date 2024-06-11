@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
 import { Subject, firstValueFrom, map, takeUntil } from "rxjs";
 
@@ -50,7 +50,7 @@ export interface PasswordInput {
     JslibModule,
   ],
 })
-export class InputPasswordComponent implements OnInit {
+export class InputPasswordComponent implements OnInit, OnDestroy {
   @Output() onPasswordFormSubmit = new EventEmitter();
 
   @Input() protected buttonText: string;
@@ -129,6 +129,11 @@ export class InputPasswordComponent implements OnInit {
   // getPasswordStrengthResult(result: any) {
   //   this.passwordStrengthResult = result;
   // }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   protected submit = async () => {
     this.formGroup.markAllAsTouched();

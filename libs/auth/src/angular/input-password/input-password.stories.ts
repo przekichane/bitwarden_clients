@@ -72,12 +72,12 @@ export default {
             masterPasswordPolicyOptions$: () => mockMasterPasswordPolicyOptions$,
           } as Partial<PolicyService>,
         },
-        {
-          provide: PasswordStrengthServiceAbstraction,
-          useValue: {
-            getPasswordStrength: () => mockZXCVBNResult,
-          } as Partial<PasswordStrengthServiceAbstraction>,
-        },
+        // {
+        //   provide: PasswordStrengthServiceAbstraction,
+        //   useValue: {
+        //     getPasswordStrength: () => mockZXCVBNResult,
+        //   } as Partial<PasswordStrengthServiceAbstraction>,
+        // },
         {
           provide: ToastService,
           useValue: {
