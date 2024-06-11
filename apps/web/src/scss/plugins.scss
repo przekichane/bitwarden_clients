@@ -45,7 +45,7 @@
 
 .mfaType0 {
   @include themify($themes) {
-    content: url("../images/two-factor/0.svg");
+    content: url("../images/two-factor/0.png");
     max-width: 120px;
     max-height: 62px;
   }
