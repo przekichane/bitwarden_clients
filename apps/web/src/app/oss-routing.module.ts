@@ -82,7 +82,6 @@ const routes: Routes = [
         component: LoginViaAuthRequestComponent,
         data: { titleId: "adminApprovalRequested" } satisfies DataProperties,
       },
-      { path: "2fa", component: TwoFactorComponent, canActivate: [UnauthGuard] },
       {
         path: "login-initiated",
         component: LoginDecryptionOptionsComponent,
@@ -127,15 +126,6 @@ const routes: Routes = [
         canActivate: [deepLinkGuard()],
         component: AcceptOrganizationComponent,
         data: { titleId: "joinOrganization", doNotSaveUrl: false } satisfies DataProperties,
-      },
-      {
-        path: "accept-emergency",
-        canActivate: [deepLinkGuard()],
-        data: { titleId: "acceptEmergency", doNotSaveUrl: false } satisfies DataProperties,
-        loadComponent: () =>
-          import("./auth/emergency-access/accept/accept-emergency.component").then(
-            (mod) => mod.AcceptEmergencyComponent,
-          ),
       },
       {
         path: "accept-families-for-enterprise",
@@ -186,12 +176,6 @@ const routes: Routes = [
         data: { titleId: "updatePassword" } satisfies DataProperties,
       },
       {
-        path: "remove-password",
-        component: RemovePasswordComponent,
-        canActivate: [AuthGuard],
-        data: { titleId: "removeMasterPassword" } satisfies DataProperties,
-      },
-      {
         path: "migrate-legacy-encryption",
         loadComponent: () =>
           import("./auth/migrate-encryption/migrate-legacy-encryption.component").then(
@@ -204,6 +188,14 @@ const routes: Routes = [
     path: "",
     component: AnonLayoutWrapperComponent,
     children: [
+      {
+        path: "2fa",
+        component: TwoFactorComponent,
+        canActivate: [unauthGuardFn()],
+        data: {
+          pageTitle: "verifyIdentity",
+        },
+      },
       {
         path: "recover-2fa",
         canActivate: [unauthGuardFn()],
@@ -221,6 +213,38 @@ const routes: Routes = [
         data: {
           pageTitle: "recoverAccountTwoStep",
           titleId: "recoverAccountTwoStep",
+        } satisfies DataProperties & AnonLayoutWrapperData,
+      },
+      {
+        path: "accept-emergency",
+        canActivate: [deepLinkGuard()],
+        children: [
+          {
+            path: "",
+            data: {
+              pageTitle: "emergencyAccess",
+              titleId: "acceptEmergency",
+              doNotSaveUrl: false,
+            } satisfies DataProperties & AnonLayoutWrapperData,
+            loadComponent: () =>
+              import("./auth/emergency-access/accept/accept-emergency.component").then(
+                (mod) => mod.AcceptEmergencyComponent,
+              ),
+          },
+          {
+            path: "",
+            component: EnvironmentSelectorComponent,
+            outlet: "environment-selector",
+          },
+        ],
+      },
+      {
+        path: "remove-password",
+        component: RemovePasswordComponent,
+        canActivate: [AuthGuard],
+        data: {
+          pageTitle: "removeMasterPassword",
+          titleId: "removeMasterPassword",
         } satisfies DataProperties & AnonLayoutWrapperData,
       },
     ],
