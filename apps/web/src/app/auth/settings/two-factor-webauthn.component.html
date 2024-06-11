@@ -67,6 +67,7 @@
         [bitAction]="readKey"
         buttonType="secondary"
         [disabled]="$any(readKeyBtn).loading || webAuthnListening || !keyIdAvailable"
+        class="tw-mr-2"
         #readKeyBtn
       >
         {{ "readKey" | i18n }}
