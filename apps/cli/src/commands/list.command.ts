@@ -128,18 +128,6 @@ export class ListCommand {
 
     await this.eventCollectionService.collectMany(EventType.Cipher_ClientViewed, ciphers, true);
 
-    // for (let i = 0; i < ciphers.length; i++) {
-    //   const c = ciphers[i];
-    //   // Set upload immediately on the last item in the ciphers collection to avoid the event collection
-    //   // service from uploading each time.
-    //   await this.eventCollectionService.collect(
-    //     EventType.Cipher_ClientViewed,
-    //     c.id,
-    //     i === ciphers.length - 1,
-    //     c.organizationId,
-    //   );
-    // }
-
     const res = new ListResponse(ciphers.map((o) => new CipherResponse(o)));
     return Response.success(res);
   }
