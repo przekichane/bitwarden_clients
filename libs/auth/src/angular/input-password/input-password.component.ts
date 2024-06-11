@@ -23,12 +23,13 @@ import {
   ToastService,
 } from "@bitwarden/components";
 
+import { PreloadedEnglishI18nModule } from "../../../../../apps/web/src/app/core/tests";
 import { InputsFieldMatch } from "../../../../angular/src/auth/validators/inputs-field-match.validator";
 import { SharedModule } from "../../../../components/src/shared";
 import { PasswordCalloutComponent } from "../password-callout/password-callout.component";
 
 export interface PasswordInput {
-  masterKeyHash: string;
+  password: string;
   hint?: string;
 }
 
@@ -52,33 +53,37 @@ export interface PasswordInput {
 export class InputPasswordComponent implements OnInit {
   @Output() onPasswordFormSubmit = new EventEmitter();
 
-  @Input() buttonText: string;
-  @Input() orgName: string;
-  @Input() orgId: string;
+  @Input() protected buttonText: string;
+  @Input() private orgName: string;
+  @Input() private orgId: string;
 
-  email: string;
-  minPasswordLength = Utils.minimumPasswordLength;
-  minHintLength = 0;
-  maxHintLength = 50;
-  masterPasswordPolicy: MasterPasswordPolicyOptions;
-  passwordStrengthResult: any; // TODO-rr-bw: fix any
+  private minHintLength = 0;
+  protected maxHintLength = 50;
 
-  passwordForm = this.formBuilder.group(
+  protected email: string;
+  protected minPasswordLength = Utils.minimumPasswordLength;
+  protected masterPasswordPolicy: MasterPasswordPolicyOptions;
+  protected passwordStrengthResult: any;
+  protected showErrorSummary = false;
+
+  protected formGroup = this.formBuilder.group(
     {
-      password: ["", Validators.required, Validators.minLength(this.minPasswordLength)],
-      confirmedPassword: ["", Validators.required, Validators.minLength(this.minPasswordLength)],
+      password: ["", [Validators.required, Validators.minLength(this.minPasswordLength)]],
+      confirmedPassword: ["", [Validators.required]],
+      // TODO-rr-bw: solve bug where hint error is thrown if password is "" and user clicks away
       hint: [
         "",
         [
           Validators.maxLength(this.maxHintLength),
-          InputsFieldMatch.validateInputsDoesntMatch(
-            "password",
-            this.i18nService.t("hintEqualsPassword"),
-          ),
+          // InputsFieldMatch.validateInputsDoesntMatch(
+          //   "password",
+          //   this.i18nService.t("hintEqualsPassword"),
+          // ),
         ],
       ],
-      checkForBreaches: [true],
+      checkForBreaches: true,
     },
+    // TODO-rr-bw: fix this (don't use deprecated .group() feature)
     {
       validator: InputsFieldMatch.validateFormInputsMatch(
         "password",
@@ -93,13 +98,13 @@ export class InputPasswordComponent implements OnInit {
   constructor(
     private accountService: AccountService,
     private auditService: AuditService,
-    private cryptoService: CryptoService,
+    // private cryptoService: CryptoService,
     private dialogService: DialogService,
     private formBuilder: FormBuilder,
     private i18nService: I18nService,
-    private kdfConfigService: KdfConfigService,
-    private policyService: PolicyService,
-    private toastService: ToastService,
+    // private kdfConfigService: KdfConfigService,
+    // private policyService: PolicyService,
+    // private toastService: ToastService,
     // private policyApiService: PolicyApiServiceAbstraction,
   ) {}
 
@@ -112,25 +117,32 @@ export class InputPasswordComponent implements OnInit {
     //   this.orgId,
     // );
 
-    this.policyService
-      .masterPasswordPolicyOptions$()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (masterPasswordPolicyOptions) =>
-          (this.masterPasswordPolicy ??= masterPasswordPolicyOptions),
-      );
+    // this.policyService
+    //   .masterPasswordPolicyOptions$()
+    //   .pipe(takeUntil(this.destroy$))
+    //   .subscribe(
+    //     (masterPasswordPolicyOptions) =>
+    //       (this.masterPasswordPolicy ??= masterPasswordPolicyOptions),
+    //   );
   }
 
-  // TODO-rr-bw: fix any
-  getPasswordStrengthResult(result: any) {
-    this.passwordStrengthResult = result;
-  }
+  // getPasswordStrengthResult(result: any) {
+  //   this.passwordStrengthResult = result;
+  // }
 
-  submit = async () => {
+  protected submit = async () => {
+    this.formGroup.markAllAsTouched();
+
+    if (this.formGroup.invalid) {
+      console.log("returning... (form is invalid)");
+      this.showErrorSummary = true;
+      return;
+    }
+
     // Check if password is breached (if breached, user chooses to accept and continue or not)
     const passwordIsBreached =
-      this.passwordForm.controls.checkForBreaches.value &&
-      (await this.auditService.passwordLeaked(this.passwordForm.controls.password.value));
+      this.formGroup.controls.checkForBreaches.value &&
+      (await this.auditService.passwordLeaked(this.formGroup.controls.password.value));
 
     if (passwordIsBreached) {
       const userAcceptedDialog = await this.dialogService.openSimpleDialog({
@@ -145,42 +157,43 @@ export class InputPasswordComponent implements OnInit {
     }
 
     // Check if password meets org policy requirements
-    if (
-      this.masterPasswordPolicy != null &&
-      !this.policyService.evaluateMasterPassword(
-        this.passwordStrengthResult.score,
-        this.passwordForm.controls.password.value,
-        this.masterPasswordPolicy,
-      )
-    ) {
-      this.toastService.showToast({
-        variant: "error",
-        title: this.i18nService.t("errorOccurred"),
-        message: this.i18nService.t("masterPasswordPolicyRequirementsNotMet"),
-      });
+    // if (
+    //   this.masterPasswordPolicy != null &&
+    //   !this.policyService.evaluateMasterPassword(
+    //     this.passwordStrengthResult.score,
+    //     this.formGroup.controls.password.value,
+    //     this.masterPasswordPolicy,
+    //   )
+    // ) {
+    //   this.toastService.showToast({
+    //     variant: "error",
+    //     title: this.i18nService.t("errorOccurred"),
+    //     message: this.i18nService.t("masterPasswordPolicyRequirementsNotMet"),
+    //   });
 
-      return;
-    }
+    //   return;
+    // }
 
-    // Create new master key
-    const masterPassword = this.passwordForm.controls.password.value;
-    const email = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.email)),
-    );
-    const kdfConfig = await this.kdfConfigService.getKdfConfig();
+    // Create and hash new master key
+    // const masterPassword = this.formGroup.controls.password.value;
+    // const email = await firstValueFrom(
+    //   this.accountService.activeAccount$.pipe(map((a) => a?.email)),
+    // );
+    // const kdfConfig = await this.kdfConfigService.getKdfConfig();
 
-    const newMasterKey = await this.cryptoService.makeMasterKey(
-      masterPassword,
-      email.trim().toLowerCase(), // TODO-rr-bw: check if it's ok to use same email retrieved during ngOnInit
-      kdfConfig,
-    );
-    const newMasterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, newMasterKey);
+    // const newMasterKey = await this.cryptoService.makeMasterKey(
+    //   masterPassword,
+    //   email.trim().toLowerCase(), // TODO-rr-bw: check if it's ok to use same email retrieved during ngOnInit
+    //   kdfConfig,
+    // );
+    // const newMasterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, newMasterKey);
 
     const passwordInput = {
-      masterKeyHash: newMasterKeyHash,
-      hint: this.passwordForm.controls.hint.value,
+      password: this.formGroup.controls.password.value,
+      hint: this.formGroup.controls.hint.value,
     };
 
-    this.onPasswordFormSubmit.emit(passwordInput);
+    console.log("reached end -> passwordInput", passwordInput);
+    this.onPasswordFormSubmit.emit(passwordInput as PasswordInput);
   };
 }
