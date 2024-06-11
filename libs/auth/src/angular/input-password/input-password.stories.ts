@@ -81,13 +81,12 @@ export default {
             // Other
             checkForBreaches: "Check known data breaches for this password",
             createAccount: "Create account",
+            inputRequired: "Input is required.", // for BitErrorComponent error message
+            toggleVisibility: "Toggle visibility", // for BitPasswordInputToggleDirective
 
             // Angular Validators
             required: "required",
             inputMaxLength: (max) => `51/${max} character maximum`, // TODO-rr-bw: not sure how to show the current length in a Validator error message
-
-            inputRequired: "Input is required.", // for BitErrorComponent error message
-            toggleVisibility: "Toggle visibility", // for BitPasswordInputToggleDirective
 
             // Password Callout
             masterPasswordPolicyInEffect:
