@@ -32,7 +32,13 @@
     [relativeTo]="route.parent"
     *ngIf="isAdmin$ | async"
   ></bit-nav-item>
-  <bit-nav-group icon="bwi-cog" [text]="'settings' | i18n" *ngIf="isAdmin$ | async">
+  <bit-nav-group
+    icon="bwi-cog"
+    [text]="'settings' | i18n"
+    *ngIf="isAdmin$ | async"
+    route="settings/import"
+    [relativeTo]="route.parent"
+  >
     <bit-nav-item
       [text]="'importData' | i18n"
       route="settings/import"
