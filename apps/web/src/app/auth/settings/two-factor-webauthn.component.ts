@@ -77,7 +77,7 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
     this.processResponse(authResponse.response);
   }
 
-  async submit() {
+  submit = async () => {
     if (this.webAuthnResponse == null || this.keyIdAvailable == null) {
       // Should never happen.
       return Promise.reject();
@@ -88,7 +88,7 @@ export class TwoFactorWebAuthnComponent extends TwoFactorBaseComponent {
     request.name = this.formGroup.value.name;
 
     return this.enableWebAuth(request);
-  }
+  };
 
   private enableWebAuth(request: any) {
     return super.enable(async () => {
