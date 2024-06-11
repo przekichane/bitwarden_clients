@@ -1,1 +1,70 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="69" height="62" fill="none"><g stroke="#175DDC" clip-path="url(#a)"><path stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M20.418 33.19c5.614 0 10.42 3.56 12.396 8.533h29.012l5.434 5.522-4.491 4.563h-6.602l-3.413-3.468-3.279 3.24-1.167-1.187-1.303 1.323-3.188-3.24-3.1 3.149H32.86c-1.932 5.065-6.782 8.67-12.44 8.67-7.366 0-13.339-6.069-13.339-13.553 0-7.483 5.928-13.552 13.338-13.552Zm-6.152 16.975c1.841 0 3.368-1.506 3.368-3.422 0-1.871-1.482-3.423-3.368-3.423-1.887 0-3.369 1.506-3.369 3.422 0 1.917 1.527 3.423 3.369 3.423Z"/><path stroke-linecap="round" d="M59.78 44.722H36.32M19.99 36.722c4.036 0 7.569 2.405 9.51 6"/><circle cx="12.24" cy="12.24" r="12.24" stroke-width="2" transform="matrix(-1 0 0 1 50.6 2.143)"/><path stroke-width="2" d="M22.753 33.423c3.836-4.174 9.41-6.8 15.615-6.8 9.698 0 17.857 6.417 20.243 15.13"/></g><defs><clipPath id="a"><path fill="#fff" d="M68.5.62H.5v61h68z"/></clipPath></defs></svg>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="62.176998"
+   height="60.152"
+   fill="none"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="7.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="11.014493"
+     inkscape:cx="34.5"
+     inkscape:cy="31.957895"
+     inkscape:window-width="2240"
+     inkscape:window-height="1499"
+     inkscape:window-x="1017"
+     inkscape:window-y="332"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg4" />
+  <g
+     stroke="#175ddc"
+     clip-path="url(#a)"
+     id="g3"
+     transform="translate(-6.081,-1.143)">
+    <path
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       stroke-miterlimit="10"
+       stroke-width="2"
+       d="m 20.418,33.19 c 5.614,0 10.42,3.56 12.396,8.533 h 29.012 l 5.434,5.522 -4.491,4.563 h -6.602 l -3.413,-3.468 -3.279,3.24 -1.167,-1.187 -1.303,1.323 -3.188,-3.24 -3.1,3.149 H 32.86 c -1.932,5.065 -6.782,8.67 -12.44,8.67 -7.366,0 -13.339,-6.069 -13.339,-13.553 0,-7.483 5.928,-13.552 13.338,-13.552 z m -6.152,16.975 c 1.841,0 3.368,-1.506 3.368,-3.422 0,-1.871 -1.482,-3.423 -3.368,-3.423 -1.887,0 -3.369,1.506 -3.369,3.422 0,1.917 1.527,3.423 3.369,3.423 z"
+       id="path1" />
+    <path
+       stroke-linecap="round"
+       d="M 59.78,44.722 H 36.32 m -16.33,-8 c 4.036,0 7.569,2.405 9.51,6"
+       id="path2" />
+    <circle
+       cx="12.24"
+       cy="12.24"
+       r="12.24"
+       stroke-width="2"
+       transform="matrix(-1,0,0,1,50.6,2.143)"
+       id="circle2" />
+    <path
+       stroke-width="2"
+       d="m 22.753,33.423 c 3.836,-4.174 9.41,-6.8 15.615,-6.8 9.698,0 17.857,6.417 20.243,15.13"
+       id="path3" />
+  </g>
+  <defs
+     id="defs4">
+    <clipPath
+       id="a">
+      <path
+         fill="#ffffff"
+         d="m 68.5,0.62 h -68 v 61 h 68 z"
+         id="path4" />
+    </clipPath>
+  </defs>
+</svg>
