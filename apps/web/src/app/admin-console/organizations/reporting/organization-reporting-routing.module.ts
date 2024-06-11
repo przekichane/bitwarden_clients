@@ -25,10 +25,7 @@ const routes: Routes = [
       {
         path: "",
         pathMatch: "full",
-        canActivate: [organizationRedirectGuard()],
-        data: {
-          autoRedirectCallback: getReportRoute,
-        },
+        canActivate: [organizationRedirectGuard(getReportRoute)],
         children: [], // This is required to make the auto redirect work,
       },
       {

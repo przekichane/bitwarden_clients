@@ -71,18 +71,12 @@ describe("Organization Redirect Guard", () => {
           {
             path: "organizations/:organizationId/stringCallback",
             component: AdminConsoleComponent,
-            canActivate: [organizationRedirectGuard()],
-            data: {
-              autoRedirectCallback: () => "success",
-            },
+            canActivate: [organizationRedirectGuard(() => "success")],
           },
           {
             path: "organizations/:organizationId/arrayCallback",
             component: AdminConsoleComponent,
-            canActivate: [organizationRedirectGuard()],
-            data: {
-              autoRedirectCallback: () => ["exponential", "success"],
-            },
+            canActivate: [organizationRedirectGuard(() => ["exponential", "success"])],
           },
         ]),
       ],

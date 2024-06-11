@@ -10,6 +10,7 @@ import {
   canAccessOrgAdmin,
   OrganizationService,
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
+import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 
 /**
  *
@@ -18,15 +19,16 @@ import {
  * tree returned will redirect to `/organizations/{id}` if possible, or `/` if
  * the user does not have permission to access `organizations/{id}`.
  */
-export function organizationRedirectGuard(): CanActivateFn {
+export function organizationRedirectGuard(
+  customRedirect?: (org: Organization) => string | string[],
+): CanActivateFn {
   return async (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const router = inject(Router);
     const organizationService = inject(OrganizationService);
 
     const org = await organizationService.get(route.params.organizationId);
 
-    const customRedirect = route.data?.autoRedirectCallback;
-    if (customRedirect) {
+    if (customRedirect != null) {
       let redirectPath = customRedirect(org);
       if (typeof redirectPath === "string") {
         redirectPath = [redirectPath];
