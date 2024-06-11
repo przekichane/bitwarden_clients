@@ -5,6 +5,13 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { MessagingService } from "@bitwarden/common/platform/abstractions/messaging.service";
 import { DialogService } from "@bitwarden/components";
 
+/**
+ * `CanActivateFn` that checks if the organization matching the id in the URL
+ * parameters is paid or free. If the organization is free instructions are
+ * provided on how to upgrade a free organization, and the user is redirected
+ * if they have access to upgrade the organization. If the organization is
+ * paid routing proceeds."
+ */
 @Injectable({
   providedIn: "root",
 })
