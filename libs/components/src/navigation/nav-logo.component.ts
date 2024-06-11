@@ -20,7 +20,8 @@ export class NavLogoComponent {
    */
   @Input({ required: true }) route: string | any[];
 
-  @Input({ required: true }) ariaLabel: string;
+  /** Passed to `attr.aria-label` and `attr.title` */
+  @Input({ required: true }) label: string;
 
   constructor(protected sideNavService: SideNavService) {}
 }

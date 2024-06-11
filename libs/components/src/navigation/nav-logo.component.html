@@ -2,7 +2,8 @@
   <a
     [routerLink]="route"
     class="tw-px-5 tw-pb-5 tw-pt-7 tw-block tw-bg-background-alt3 tw-outline-none focus-visible:tw-ring focus-visible:tw-ring-inset focus-visible:tw-ring-text-alt2"
-    [attr.aria-label]="ariaLabel"
+    [attr.aria-label]="label"
+    [title]="label"
     routerLinkActive
     [ariaCurrentWhenActive]="'page'"
   >
@@ -15,5 +16,6 @@
   [route]="route"
   [icon]="closedIcon"
   *ngIf="!sideNavService.open"
-  [ariaLabel]="ariaLabel"
+  [ariaLabel]="label"
+  [title]="label"
 ></bit-nav-item>
