@@ -24,9 +24,9 @@ export class NavGroupComponent extends NavBaseComponent implements AfterContentI
   })
   nestedNavComponents!: QueryList<NavBaseComponent>;
 
-  /** The parent nav item should not show active styles when open. */
+  /** When the side nav is open, the parent nav item should not show active styles when open. */
   protected get parentHideActiveStyles(): boolean {
-    return this.hideActiveStyles || this.open;
+    return this.hideActiveStyles || (this.open && this.sideNavService.open);
   }
 
   /**
