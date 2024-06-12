@@ -39,11 +39,7 @@ export class AccessPolicySelectorService {
     }
 
     const organization = await this.organizationService.get(organizationId);
-    if (organization.isOwner || organization.isAdmin) {
-      return false;
-    }
-
-    if (!this.userHasReadWriteAccess(current)) {
+    if (organization.isOwner || organization.isAdmin || !this.userHasReadWriteAccess(current)) {
       return false;
     }
 
