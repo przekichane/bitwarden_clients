@@ -55,25 +55,19 @@
           <form
             [formGroup]="verifyBankForm"
             [bitSubmit]="verifyBank"
-            class="tw-flex tw-flex-wrap tw-space-x-2"
+            class="tw-flex tw-flex-wrap tw-items-center tw-space-x-2"
           >
-            <bit-form-field class="tw-mr-2 tw-w-40">
+            <bit-form-field class="tw-w-40">
               <bit-label>{{ "amountX" | i18n: "1" }}</bit-label>
               <input bitInput type="number" step="1" placeholder="xx" formControlName="amount1" />
               <span bitPrefix>$0.</span>
             </bit-form-field>
-            <bit-form-field class="tw-mr-2 tw-w-40">
+            <bit-form-field class="tw-w-40">
               <bit-label>{{ "amountX" | i18n: "2" }}</bit-label>
               <input bitInput type="number" step="1" placeholder="xx" formControlName="amount2" />
               <span bitPrefix>$0.</span>
             </bit-form-field>
-            <button
-              bitButton
-              bitFormButton
-              buttonType="primary"
-              type="submit"
-              class="tw-w-1/4 tw-h-10 tw-my-6"
-            >
+            <button bitButton bitFormButton buttonType="primary" type="submit">
               {{ "verifyBankAccount" | i18n }}
             </button>
           </form>
@@ -83,23 +77,9 @@
           {{ paymentSource.description }}
         </p>
       </ng-container>
-      <button
-        type="button"
-        bitButton
-        buttonType="secondary"
-        [bitAction]="changePayment"
-        *ngIf="!showAdjustPayment"
-      >
+      <button type="button" bitButton buttonType="secondary" [bitAction]="changePayment">
         {{ (paymentSource ? "changePaymentMethod" : "addPaymentMethod") | i18n }}
       </button>
-      <app-adjust-payment
-        [organizationId]="organizationId"
-        [currentType]="paymentSource != null ? paymentSource.type : null"
-        (onAdjusted)="closePayment(true)"
-        (onCanceled)="closePayment(false)"
-        *ngIf="showAdjustPayment"
-      >
-      </app-adjust-payment>
       <p *ngIf="isUnpaid" bitTypography="body1">
         {{ "paymentChargedWithUnpaidSubscription" | i18n }}
       </p>
