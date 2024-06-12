@@ -74,7 +74,7 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
   protected formGroup = this.formBuilder.group(
     {
       password: ["", [Validators.required, Validators.minLength(this.minPasswordLength)]],
-      confirmedPassword: ["", [Validators.required]],
+      confirmedPassword: ["", Validators.required],
       hint: [
         "", // must be string (not null) because we check length in validation
         Validators.maxLength(this.maxHintLength),

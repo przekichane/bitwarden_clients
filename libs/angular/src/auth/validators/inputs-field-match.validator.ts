@@ -101,36 +101,40 @@ export class InputsFieldMatch {
       const controlThatShowsError = showErrorOn === "controlA" ? controlA : controlB;
 
       // Don't compare empty strings
-      if (controlA.value === "") {
-        return valid();
+      if (controlA.value === "" && controlB.value === "") {
+        return pass();
       }
 
       const controlValuesMatch = controlA.value === controlB.value;
 
       if (validationGoal === "match") {
         if (controlValuesMatch) {
-          return valid();
+          return pass();
         } else {
-          return invalid();
+          return fail();
         }
       }
 
       if (validationGoal === "doNotMatch") {
         if (!controlValuesMatch) {
-          return valid();
+          return pass();
         } else {
-          return invalid();
+          return fail();
         }
       }
 
       // TODO-rr-bw: default return?
 
-      function invalid() {
+      function fail() {
         controlThatShowsError.setErrors({
+          // Preserve any pre-existing errors
+          ...controlThatShowsError.errors,
+          // Add new inputMatchError
           inputMatchError: {
             message: errorMessage,
           },
         });
+
         return {
           inputMatchError: {
             message: errorMessage,
@@ -138,8 +142,24 @@ export class InputsFieldMatch {
         };
       }
 
-      function valid(): null {
-        controlThatShowsError.setErrors(null);
+      function pass(): null {
+        // Get the current errors object
+        const errorsObj = controlThatShowsError?.errors;
+
+        if (errorsObj != null) {
+          // Remove any inputMatchError if it exists, since that is the sole error we are targeting with this validator
+          if (errorsObj?.inputMatchError) {
+            delete errorsObj.inputMatchError;
+          }
+
+          // Check if the errorsObj is now empty
+          const isEmptyObj = Object.keys(errorsObj).length === 0;
+
+          // If the errorsObj is empty, set errors to null, otherwise set the errors to an object of pre-existing errors (other than inputMatchError)
+          controlThatShowsError.setErrors(isEmptyObj ? null : errorsObj);
+        }
+
+        // Return null for this validator
         return null;
       }
     };
