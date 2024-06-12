@@ -11,6 +11,56 @@ import { AccessPolicyService } from "../shared/access-policies/access-policy.ser
 
 import { SecretService } from "./secret.service";
 
+describe("SecretService", () => {
+  let sut: SecretService;
+
+  const cryptoService = mock<CryptoService>();
+  const apiService = mock<ApiService>();
+  const encryptService = mock<EncryptService>();
+  const accessPolicyService = mock<AccessPolicyService>();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+
+    sut = new SecretService(cryptoService, apiService, encryptService, accessPolicyService);
+
+    encryptService.encrypt.mockResolvedValue({
+      encryptedString: "mockEncryptedString",
+    } as EncString);
+    encryptService.decryptToUtf8.mockResolvedValue(mockUnencryptedData);
+  });
+
+  it("instantiates", () => {
+    expect(sut).not.toBeFalsy();
+  });
+
+  describe("create", () => {
+    it("emits the secret created", async () => {
+      apiService.send.mockResolvedValue(mockedSecretResponse);
+
+      sut.secret$.subscribe((secret) => {
+        expect(secret).toBeDefined();
+        expect(secret).toEqual(expectedSecretView);
+      });
+
+      await sut.create("organizationId", secretView, secretAccessPoliciesView);
+    });
+  });
+
+  describe("update", () => {
+    it("emits the secret updated", async () => {
+      apiService.send.mockResolvedValue(mockedSecretResponse);
+
+      sut.secret$.subscribe((secret) => {
+        expect(secret).toBeDefined();
+        expect(secret).toEqual(expectedSecretView);
+      });
+
+      await sut.update("organizationId", secretView, secretAccessPoliciesView);
+    });
+  });
+});
+
 const mockedSecretResponse: any = {
   id: "001f835c-aa41-4f25-bfbf-b18d0103a1db",
   organizationId: "da0eea55-8604-4307-8a24-b187015e3071",
@@ -73,58 +123,3 @@ const expectedSecretView: SecretView = {
   read: true,
   write: true,
 };
-
-describe("SecretService", () => {
-  let secretService: SecretService;
-
-  const cryptoService = mock<CryptoService>();
-  const apiService = mock<ApiService>();
-  const encryptService = mock<EncryptService>();
-  const accessPolicyService = mock<AccessPolicyService>();
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-
-    secretService = new SecretService(
-      cryptoService,
-      apiService,
-      encryptService,
-      accessPolicyService,
-    );
-
-    encryptService.encrypt.mockResolvedValue({
-      encryptedString: "mockEncryptedString",
-    } as EncString);
-    encryptService.decryptToUtf8.mockResolvedValue(mockUnencryptedData);
-  });
-
-  it("instantiates", () => {
-    expect(secretService).not.toBeFalsy();
-  });
-
-  describe("create", () => {
-    it("emits the secret created", async () => {
-      apiService.send.mockResolvedValue(mockedSecretResponse);
-
-      secretService.secret$.subscribe((secret) => {
-        expect(secret).toBeDefined();
-        expect(secret).toEqual(expectedSecretView);
-      });
-
-      await secretService.create("organizationId", secretView, secretAccessPoliciesView);
-    });
-  });
-
-  describe("update", () => {
-    it("emits the secret updated", async () => {
-      apiService.send.mockResolvedValue(mockedSecretResponse);
-
-      secretService.secret$.subscribe((secret) => {
-        expect(secret).toBeDefined();
-        expect(secret).toEqual(expectedSecretView);
-      });
-
-      await secretService.update("organizationId", secretView, secretAccessPoliciesView);
-    });
-  });
-});
