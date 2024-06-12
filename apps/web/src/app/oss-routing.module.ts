@@ -82,7 +82,6 @@ const routes: Routes = [
         component: LoginViaAuthRequestComponent,
         data: { titleId: "adminApprovalRequested" } satisfies DataProperties,
       },
-      { path: "2fa", component: TwoFactorComponent, canActivate: [UnauthGuard] },
       {
         path: "login-initiated",
         component: LoginDecryptionOptionsComponent,
@@ -136,12 +135,6 @@ const routes: Routes = [
       },
       { path: "recover", pathMatch: "full", redirectTo: "recover-2fa" },
       {
-        path: "recover-delete",
-        component: RecoverDeleteComponent,
-        canActivate: [UnauthGuard],
-        data: { titleId: "deleteAccount" } satisfies DataProperties,
-      },
-      {
         path: "verify-recover-delete-org",
         component: VerifyRecoverDeleteOrgComponent,
         canActivate: [UnauthGuard],
@@ -171,12 +164,6 @@ const routes: Routes = [
         data: { titleId: "updatePassword" } satisfies DataProperties,
       },
       {
-        path: "remove-password",
-        component: RemovePasswordComponent,
-        canActivate: [AuthGuard],
-        data: { titleId: "removeMasterPassword" } satisfies DataProperties,
-      },
-      {
         path: "migrate-legacy-encryption",
         loadComponent: () =>
           import("./auth/migrate-encryption/migrate-legacy-encryption.component").then(
@@ -189,6 +176,14 @@ const routes: Routes = [
     path: "",
     component: AnonLayoutWrapperComponent,
     children: [
+      {
+        path: "2fa",
+        component: TwoFactorComponent,
+        canActivate: [unauthGuardFn()],
+        data: {
+          pageTitle: "verifyIdentity",
+        },
+      },
       {
         path: "recover-2fa",
         canActivate: [unauthGuardFn()],
@@ -224,12 +219,49 @@ const routes: Routes = [
                 (mod) => mod.AcceptEmergencyComponent,
               ),
           },
+        ],
+      },
+      {
+        path: "recover-delete",
+        canActivate: [unauthGuardFn()],
+        children: [
+          {
+            path: "",
+            component: RecoverDeleteComponent,
+            data: {
+              pageTitle: "deleteAccount",
+              titleId: "deleteAccount",
+            } satisfies DataProperties & AnonLayoutWrapperData,
+          },
           {
             path: "",
             component: EnvironmentSelectorComponent,
             outlet: "environment-selector",
           },
         ],
+      },
+      {
+        path: "verify-recover-delete",
+        canActivate: [unauthGuardFn()],
+        children: [
+          {
+            path: "",
+            component: VerifyRecoverDeleteComponent,
+            data: {
+              pageTitle: "deleteAccount",
+              titleId: "deleteAccount",
+            } satisfies DataProperties & AnonLayoutWrapperData,
+          },
+        ],
+      },
+      {
+        path: "remove-password",
+        component: RemovePasswordComponent,
+        canActivate: [AuthGuard],
+        data: {
+          pageTitle: "removeMasterPassword",
+          titleId: "removeMasterPassword",
+        } satisfies DataProperties & AnonLayoutWrapperData,
       },
     ],
   },
@@ -340,20 +372,6 @@ const routes: Routes = [
     path: "organizations",
     loadChildren: () =>
       import("./admin-console/organizations/organization.module").then((m) => m.OrganizationModule),
-  },
-  {
-    path: "",
-    component: AnonLayoutWrapperComponent,
-    children: [
-      {
-        path: "verify-recover-delete",
-        component: VerifyRecoverDeleteComponent,
-        canActivate: [unauthGuardFn()],
-        data: {
-          titleId: "deleteAccount",
-        } satisfies DataProperties,
-      },
-    ],
   },
 ];
 
