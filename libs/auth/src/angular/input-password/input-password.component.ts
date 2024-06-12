@@ -82,19 +82,22 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
       checkForBreaches: true,
     },
     {
-      validators: InputsFieldMatch.validateFormInputsDoNotMatch(
-        "password",
-        "hint",
-        this.i18nService.t("hintEqualsPassword"),
-      ),
+      validators: [
+        InputsFieldMatch.validateFormInputsComparison(
+          "match",
+          "password",
+          "confirmedPassword",
+          this.i18nService.t("masterPassDoesntMatch"),
+        ),
+        InputsFieldMatch.validateFormInputsComparison(
+          "doNotMatch",
+          "password",
+          "hint",
+          this.i18nService.t("hintEqualsPassword"),
+        ),
+      ],
     },
   );
-
-  // InputsFieldMatch.validateFormInputsDoNotMatch(
-  //   "password",
-  //   "confirmedPassword",
-  //   this.i18nService.t("masterPassDoesntMatch"),
-  // )
 
   protected destroy$ = new Subject<void>();
 

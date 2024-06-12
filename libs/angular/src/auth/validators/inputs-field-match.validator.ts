@@ -3,7 +3,11 @@ import { AbstractControl, UntypedFormGroup, ValidationErrors, ValidatorFn } from
 import { FormGroupControls } from "../../platform/abstractions/form-validation-errors.service";
 
 export class InputsFieldMatch {
-  //check to ensure two fields do not have the same value
+  /**
+   *  Check to ensure two fields do not have the same value
+   *
+   * @deprecated Use validateFormInputsComparison() instead
+   */
   static validateInputsDoesntMatch(matchTo: string, errorMessage: string): ValidatorFn {
     return (control: AbstractControl) => {
       if (control.parent && control.parent.controls) {
@@ -20,6 +24,7 @@ export class InputsFieldMatch {
     };
   }
 
+  // TODO-rr-bw: Check we we can remove this (we are not currently using it)
   //check to ensure two fields have the same value
   static validateInputsMatch(matchTo: string, errorMessage: string): ValidatorFn {
     return (control: AbstractControl) => {
@@ -37,7 +42,18 @@ export class InputsFieldMatch {
     };
   }
 
-  //checks the formGroup if two fields have the same value and validation is controlled from either field
+  /**
+   * Checks the formGroup if two fields have the same value and validation is controlled from either field
+   *
+   * @deprecated
+   * Use validateFormInputsComparison instead.
+   *
+   * For more info on deprecation
+   * - Do not use untyped `options` object in formBuilder.group() {@link https://angular.dev/api/forms/UntypedFormBuilder}
+   * - Use formBuilder.group() overload with AbstractControlOptions type instead {@link https://angular.dev/api/forms/AbstractControlOptions}
+   *
+   * Remove this method after deprecated instances are replaced
+   */
   static validateFormInputsMatch(field: string, fieldMatchTo: string, errorMessage: string) {
     return (formGroup: UntypedFormGroup) => {
       const fieldCtrl = formGroup.controls[field];
@@ -61,13 +77,15 @@ export class InputsFieldMatch {
    * - Validation is controlled from either form control.
    * - The error message is displayed under controlB by default, but can be set to controlA.
    *
+   * @param validationGoal Whether you want to verify that the form control input values match or do not match
    * @param controlNameA The name of the first form control to compare.
    * @param controlNameB The name of the second form control to compare.
    * @param errorMessage The error message to display if there is an error. This will probably
    *                     be an i18n translated string.
    * @param showErrorOn The control under which you want to display the error (default is controlB).
    */
-  static validateFormInputsDoNotMatch(
+  static validateFormInputsComparison(
+    validationGoal: "match" | "doNotMatch",
     controlNameA: string,
     controlNameB: string,
     errorMessage: string,
@@ -80,22 +98,41 @@ export class InputsFieldMatch {
 
       // Don't compare empty strings
       if (controlA.value === "") {
-        controlThatShowsError.setErrors(null);
-        return null;
+        return valid();
       }
 
-      if (controlA.value === controlB.value) {
+      const controlValuesMatch = controlA.value === controlB.value;
+
+      if (validationGoal === "match") {
+        if (controlValuesMatch) {
+          return valid();
+        } else {
+          return invalid();
+        }
+      }
+
+      if (validationGoal === "doNotMatch") {
+        if (!controlValuesMatch) {
+          return valid();
+        } else {
+          return invalid();
+        }
+      }
+
+      function invalid() {
         controlThatShowsError.setErrors({
-          inputsShouldNotMatchError: {
+          inputMatchError: {
             message: errorMessage,
           },
         });
         return {
-          inputsShouldNotMatchError: {
+          inputMatchError: {
             message: errorMessage,
           },
         };
-      } else {
+      }
+
+      function valid(): null {
         controlThatShowsError.setErrors(null);
         return null;
       }
