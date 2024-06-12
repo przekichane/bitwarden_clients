@@ -17,7 +17,7 @@ import {
 
 import { ClientsComponent } from "./clients/clients.component";
 import { CreateOrganizationComponent } from "./clients/create-organization.component";
-import { ProviderPermissionsGuard } from "./guards/provider-permissions.guard";
+import { providerPermissionsGuard } from "./guards/provider-permissions.guard";
 import { AcceptProviderComponent } from "./manage/accept-provider.component";
 import { EventsComponent } from "./manage/events.component";
 import { PeopleComponent } from "./manage/people.component";
@@ -76,7 +76,7 @@ const routes: Routes = [
       {
         path: ":providerId",
         component: ProvidersLayoutComponent,
-        canActivate: [ProviderPermissionsGuard],
+        canActivate: [providerPermissionsGuard()],
         children: [
           { path: "", pathMatch: "full", redirectTo: "clients" },
           { path: "clients/create", component: CreateOrganizationComponent },
@@ -98,19 +98,21 @@ const routes: Routes = [
               {
                 path: "people",
                 component: PeopleComponent,
-                canActivate: [ProviderPermissionsGuard],
+                canActivate: [
+                  providerPermissionsGuard((provider: Provider) => provider.canManageUsers),
+                ],
                 data: {
                   titleId: "people",
-                  providerPermissions: (provider: Provider) => provider.canManageUsers,
                 },
               },
               {
                 path: "events",
                 component: EventsComponent,
-                canActivate: [ProviderPermissionsGuard],
+                canActivate: [
+                  providerPermissionsGuard((provider: Provider) => provider.canAccessEventLogs),
+                ],
                 data: {
                   titleId: "eventLogs",
-                  providerPermissions: (provider: Provider) => provider.canAccessEventLogs,
                 },
               },
             ],
@@ -118,7 +120,6 @@ const routes: Routes = [
           {
             path: "billing",
             canActivate: [hasConsolidatedBilling],
-            data: { providerPermissions: (provider: Provider) => provider.isProviderAdmin },
             children: [
               {
                 path: "",
@@ -152,10 +153,11 @@ const routes: Routes = [
               {
                 path: "account",
                 component: AccountComponent,
-                canActivate: [ProviderPermissionsGuard],
+                canActivate: [
+                  providerPermissionsGuard((provider: Provider) => provider.isProviderAdmin),
+                ],
                 data: {
                   titleId: "myProvider",
-                  providerPermissions: (provider: Provider) => provider.isProviderAdmin,
                 },
               },
             ],
