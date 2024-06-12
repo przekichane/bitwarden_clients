@@ -1,5 +1,12 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  ValidatorFn,
+  AbstractControl,
+  ValidationErrors,
+} from "@angular/forms";
 import { Subject, firstValueFrom, map, takeUntil } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
@@ -23,7 +30,6 @@ import {
   ToastService,
 } from "@bitwarden/components";
 
-import { PreloadedEnglishI18nModule } from "../../../../../apps/web/src/app/core/tests";
 import { InputsFieldMatch } from "../../../../angular/src/auth/validators/inputs-field-match.validator";
 import { SharedModule } from "../../../../components/src/shared";
 import { PasswordCalloutComponent } from "../password-callout/password-callout.component";
@@ -54,8 +60,7 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
   @Output() onPasswordFormSubmit = new EventEmitter();
 
   @Input() protected buttonText: string;
-  @Input() private orgName: string;
-  @Input() private orgId: string;
+  // @Input() private orgId: string;
 
   private minHintLength = 0;
   protected maxHintLength = 50;
@@ -70,28 +75,26 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
     {
       password: ["", [Validators.required, Validators.minLength(this.minPasswordLength)]],
       confirmedPassword: ["", [Validators.required]],
-      // TODO-rr-bw: solve bug where hint error is thrown if password is "" and user clicks away
       hint: [
-        "",
-        [
-          Validators.maxLength(this.maxHintLength),
-          // InputsFieldMatch.validateInputsDoesntMatch(
-          //   "password",
-          //   this.i18nService.t("hintEqualsPassword"),
-          // ),
-        ],
+        "", // must be string (not null) because we check length in validation
+        Validators.maxLength(this.maxHintLength),
       ],
       checkForBreaches: true,
     },
-    // TODO-rr-bw: fix this (don't use deprecated .group() feature)
     {
-      validator: InputsFieldMatch.validateFormInputsMatch(
+      validators: InputsFieldMatch.validateFormInputsDoNotMatch(
         "password",
-        "confirmedPassword",
-        this.i18nService.t("masterPassDoesntMatch"),
+        "hint",
+        this.i18nService.t("hintEqualsPassword"),
       ),
     },
   );
+
+  // InputsFieldMatch.validateFormInputsDoNotMatch(
+  //   "password",
+  //   "confirmedPassword",
+  //   this.i18nService.t("masterPassDoesntMatch"),
+  // )
 
   protected destroy$ = new Subject<void>();
 
@@ -127,6 +130,7 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
   }
 
   // getPasswordStrengthResult(result: any) {
+  //   console.log("passwordStrengthResult ->", result);
   //   this.passwordStrengthResult = result;
   // }
 

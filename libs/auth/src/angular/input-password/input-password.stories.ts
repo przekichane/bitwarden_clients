@@ -1,6 +1,8 @@
 import { importProvidersFrom } from "@angular/core";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { action } from "@storybook/addon-actions";
 import { Meta, StoryObj, applicationConfig, moduleMetadata } from "@storybook/angular";
+import { ZXCVBNResult } from "zxcvbn";
 
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
@@ -66,22 +68,23 @@ export default {
         //       }),
         //   },
         // },
-        {
-          provide: PolicyService,
-          useValue: {
-            masterPasswordPolicyOptions$: () => mockMasterPasswordPolicyOptions$,
-          } as Partial<PolicyService>,
-        },
+        // {
+        //   provide: PolicyService,
+        //   useValue: {
+        //     masterPasswordPolicyOptions$: () => mockMasterPasswordPolicyOptions$,
+        //     evaluateMasterPassword: () => false,
+        //   } as Partial<PolicyService>,
+        // },
         // {
         //   provide: PasswordStrengthServiceAbstraction,
         //   useValue: {
-        //     getPasswordStrength: () => mockZXCVBNResult,
+        //     getPasswordStrength: () => ({ score: 3 }) as ZXCVBNResult,
         //   } as Partial<PasswordStrengthServiceAbstraction>,
         // },
         {
           provide: ToastService,
           useValue: {
-            showToast: () => undefined,
+            showToast: action("ToastService.showToast"),
           } as Partial<ToastService>,
         },
       ],
