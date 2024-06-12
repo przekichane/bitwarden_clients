@@ -9,7 +9,7 @@ import { OrganizationUserType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { DialogService } from "@bitwarden/components";
 
-import { IsPaidOrgGuard } from "./is-paid-org.guard";
+import { isPaidOrgGuard } from "./is-paid-org.guard";
 
 @Component({
   template: "<h1>This is the home screen!</h1>",
@@ -58,7 +58,7 @@ describe("Is Paid Org Guard", () => {
           {
             path: "organizations/:organizationId/paidOrganizationsOnly",
             component: PaidOrganizationOnlyComponent,
-            canActivate: [IsPaidOrgGuard],
+            canActivate: [isPaidOrgGuard()],
           },
           {
             path: "organizations/:organizationId/billing/subscription",
