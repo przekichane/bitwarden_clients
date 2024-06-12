@@ -6,7 +6,9 @@ export class InputsFieldMatch {
   /**
    *  Check to ensure two fields do not have the same value
    *
-   * @deprecated Use validateFormInputsComparison() instead
+   * @deprecated Use compareInputs() instead
+   *
+   * // TODO-rr-bw: consider just replacing deprecated custom validators in this PR.
    */
   static validateInputsDoesntMatch(matchTo: string, errorMessage: string): ValidatorFn {
     return (control: AbstractControl) => {
@@ -46,13 +48,15 @@ export class InputsFieldMatch {
    * Checks the formGroup if two fields have the same value and validation is controlled from either field
    *
    * @deprecated
-   * Use validateFormInputsComparison instead.
+   * Use compareInputs() instead.
    *
    * For more info on deprecation
    * - Do not use untyped `options` object in formBuilder.group() {@link https://angular.dev/api/forms/UntypedFormBuilder}
    * - Use formBuilder.group() overload with AbstractControlOptions type instead {@link https://angular.dev/api/forms/AbstractControlOptions}
    *
    * Remove this method after deprecated instances are replaced
+   *
+   * // TODO-rr-bw: consider just replacing deprecated custom validators in this PR.
    */
   static validateFormInputsMatch(field: string, fieldMatchTo: string, errorMessage: string) {
     return (formGroup: UntypedFormGroup) => {
@@ -84,7 +88,7 @@ export class InputsFieldMatch {
    *                     be an i18n translated string.
    * @param showErrorOn The control under which you want to display the error (default is controlB).
    */
-  static validateFormInputsComparison(
+  static compareInputs(
     validationGoal: "match" | "doNotMatch",
     controlNameA: string,
     controlNameB: string,
@@ -118,6 +122,8 @@ export class InputsFieldMatch {
           return invalid();
         }
       }
+
+      // TODO-rr-bw: default return?
 
       function invalid() {
         controlThatShowsError.setErrors({

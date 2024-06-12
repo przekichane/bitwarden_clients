@@ -83,13 +83,13 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
     },
     {
       validators: [
-        InputsFieldMatch.validateFormInputsComparison(
+        InputsFieldMatch.compareInputs(
           "match",
           "password",
           "confirmedPassword",
           this.i18nService.t("masterPassDoesntMatch"),
         ),
-        InputsFieldMatch.validateFormInputsComparison(
+        InputsFieldMatch.compareInputs(
           "doNotMatch",
           "password",
           "hint",
