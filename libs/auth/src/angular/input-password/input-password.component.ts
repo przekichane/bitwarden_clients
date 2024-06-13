@@ -1,13 +1,6 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from "@angular/core";
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  Validators,
-  ValidatorFn,
-  AbstractControl,
-  ValidationErrors,
-} from "@angular/forms";
-import { Subject, firstValueFrom, map, takeUntil } from "rxjs";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
+import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
+import { firstValueFrom, map } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
@@ -35,7 +28,7 @@ import { SharedModule } from "../../../../components/src/shared";
 import { PasswordCalloutComponent } from "../password-callout/password-callout.component";
 
 export interface PasswordInput {
-  password: string;
+  masterKeyHash: string;
   hint?: string;
 }
 
@@ -56,11 +49,11 @@ export interface PasswordInput {
     JslibModule,
   ],
 })
-export class InputPasswordComponent implements OnInit, OnDestroy {
+export class InputPasswordComponent implements OnInit {
   @Output() onPasswordFormSubmit = new EventEmitter();
 
   @Input() protected buttonText: string;
-  // @Input() private orgId: string;
+  @Input() private orgId: string;
 
   private minHintLength = 0;
   protected maxHintLength = 50;
@@ -77,7 +70,7 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
       confirmedPassword: ["", Validators.required],
       hint: [
         "", // must be string (not null) because we check length in validation
-        Validators.maxLength(this.maxHintLength),
+        [Validators.minLength(this.minHintLength), Validators.maxLength(this.maxHintLength)],
       ],
       checkForBreaches: true,
     },
@@ -99,19 +92,17 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
     },
   );
 
-  protected destroy$ = new Subject<void>();
-
   constructor(
     private accountService: AccountService,
     private auditService: AuditService,
-    // private cryptoService: CryptoService,
+    private cryptoService: CryptoService,
     private dialogService: DialogService,
     private formBuilder: FormBuilder,
     private i18nService: I18nService,
-    // private kdfConfigService: KdfConfigService,
-    // private policyService: PolicyService,
-    // private toastService: ToastService,
-    // private policyApiService: PolicyApiServiceAbstraction,
+    private kdfConfigService: KdfConfigService,
+    private policyService: PolicyService,
+    private toastService: ToastService,
+    private policyApiService: PolicyApiServiceAbstraction,
   ) {}
 
   async ngOnInit() {
@@ -119,27 +110,14 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
       this.accountService.activeAccount$.pipe(map((a) => a?.email)),
     );
 
-    // this.masterPasswordPolicy = await this.policyApiService.getMasterPasswordPolicyOptsForOrgUser(
-    //   this.orgId,
-    // );
-
-    // this.policyService
-    //   .masterPasswordPolicyOptions$()
-    //   .pipe(takeUntil(this.destroy$))
-    //   .subscribe(
-    //     (masterPasswordPolicyOptions) =>
-    //       (this.masterPasswordPolicy ??= masterPasswordPolicyOptions),
-    //   );
+    this.masterPasswordPolicy = await this.policyApiService.getMasterPasswordPolicyOptsForOrgUser(
+      this.orgId,
+    );
   }
 
-  // getPasswordStrengthResult(result: any) {
-  //   console.log("passwordStrengthResult ->", result);
-  //   this.passwordStrengthResult = result;
-  // }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  getPasswordStrengthResult(result: any) {
+    console.log("passwordStrengthResult ->", result);
+    this.passwordStrengthResult = result;
   }
 
   protected submit = async () => {
@@ -169,39 +147,39 @@ export class InputPasswordComponent implements OnInit, OnDestroy {
     }
 
     // Check if password meets org policy requirements
-    // if (
-    //   this.masterPasswordPolicy != null &&
-    //   !this.policyService.evaluateMasterPassword(
-    //     this.passwordStrengthResult.score,
-    //     this.formGroup.controls.password.value,
-    //     this.masterPasswordPolicy,
-    //   )
-    // ) {
-    //   this.toastService.showToast({
-    //     variant: "error",
-    //     title: this.i18nService.t("errorOccurred"),
-    //     message: this.i18nService.t("masterPasswordPolicyRequirementsNotMet"),
-    //   });
+    if (
+      this.masterPasswordPolicy != null &&
+      !this.policyService.evaluateMasterPassword(
+        this.passwordStrengthResult.score,
+        this.formGroup.controls.password.value,
+        this.masterPasswordPolicy,
+      )
+    ) {
+      this.toastService.showToast({
+        variant: "error",
+        title: this.i18nService.t("errorOccurred"),
+        message: this.i18nService.t("masterPasswordPolicyRequirementsNotMet"),
+      });
 
-    //   return;
-    // }
+      return;
+    }
 
     // Create and hash new master key
-    // const masterPassword = this.formGroup.controls.password.value;
-    // const email = await firstValueFrom(
-    //   this.accountService.activeAccount$.pipe(map((a) => a?.email)),
-    // );
-    // const kdfConfig = await this.kdfConfigService.getKdfConfig();
+    const masterPassword = this.formGroup.controls.password.value;
+    const email = await firstValueFrom(
+      this.accountService.activeAccount$.pipe(map((a) => a?.email)),
+    );
+    const kdfConfig = await this.kdfConfigService.getKdfConfig();
 
-    // const newMasterKey = await this.cryptoService.makeMasterKey(
-    //   masterPassword,
-    //   email.trim().toLowerCase(), // TODO-rr-bw: check if it's ok to use same email retrieved during ngOnInit
-    //   kdfConfig,
-    // );
-    // const newMasterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, newMasterKey);
+    const newMasterKey = await this.cryptoService.makeMasterKey(
+      masterPassword,
+      email.trim().toLowerCase(),
+      kdfConfig,
+    );
+    const newMasterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, newMasterKey);
 
     const passwordInput = {
-      password: this.formGroup.controls.password.value,
+      masterKeyHash: newMasterKeyHash,
       hint: this.formGroup.controls.hint.value,
     };
 
