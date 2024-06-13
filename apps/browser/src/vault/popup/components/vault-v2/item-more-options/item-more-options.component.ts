@@ -62,6 +62,10 @@ export class ItemMoreOptionsComponent {
     return [CipherType.Login, CipherType.Card, CipherType.Identity].includes(this.cipher.type);
   }
 
+  get isLogin() {
+    return this.cipher.type === CipherType.Login;
+  }
+
   get favoriteText() {
     return this.cipher.favorite ? "unfavorite" : "favorite";
   }
