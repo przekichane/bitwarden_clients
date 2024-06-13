@@ -66,6 +66,14 @@ export class ItemMoreOptionsComponent {
     return this.cipher.favorite ? "unfavorite" : "favorite";
   }
 
+  async doAutofill() {
+    await this.vaultPopupAutofillService.doAutofill(this.cipher);
+  }
+
+  async doAutofillAndSave() {
+    await this.vaultPopupAutofillService.doAutofillAndSave(this.cipher);
+  }
+
   /**
    * Determines if the login cipher can be launched in a new browser tab.
    */
