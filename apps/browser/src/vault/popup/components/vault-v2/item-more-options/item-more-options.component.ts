@@ -18,7 +18,7 @@ import { PasswordRepromptService } from "@bitwarden/vault";
 
 import { BrowserApi } from "../../../../../platform/browser/browser-api";
 import BrowserPopupUtils from "../../../../../platform/popup/browser-popup-utils";
-import { VaultPopupItemsService } from "../../../services/vault-popup-items.service";
+import { VaultPopupAutofillService } from "../../../services/vault-popup-autofill.service";
 
 @Component({
   standalone: true,
@@ -39,16 +39,16 @@ export class ItemMoreOptionsComponent {
   @Input({ transform: booleanAttribute })
   hideAutofillOptions: boolean;
 
-  protected autofillAllowed$ = this.vaultPopupItemsService.autofillAllowed$;
+  protected autofillAllowed$ = this.vaultPopupAutofillService.autofillAllowed$;
 
   constructor(
     private cipherService: CipherService,
-    private vaultPopupItemsService: VaultPopupItemsService,
     private passwordRepromptService: PasswordRepromptService,
     private toastService: ToastService,
     private dialogService: DialogService,
     private router: Router,
     private i18nService: I18nService,
+    private vaultPopupAutofillService: VaultPopupAutofillService,
   ) {}
 
   get canEdit() {
