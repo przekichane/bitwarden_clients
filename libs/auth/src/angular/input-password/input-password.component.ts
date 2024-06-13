@@ -116,7 +116,6 @@ export class InputPasswordComponent implements OnInit {
   }
 
   getPasswordStrengthResult(result: any) {
-    console.log("passwordStrengthResult ->", result);
     this.passwordStrengthResult = result;
   }
 
@@ -124,7 +123,6 @@ export class InputPasswordComponent implements OnInit {
     this.formGroup.markAllAsTouched();
 
     if (this.formGroup.invalid) {
-      console.log("returning... (form is invalid)");
       this.showErrorSummary = true;
       return;
     }
@@ -183,7 +181,6 @@ export class InputPasswordComponent implements OnInit {
       hint: this.formGroup.controls.hint.value,
     };
 
-    console.log("reached end -> passwordInput", passwordInputResult);
     this.onPasswordFormSubmit.emit(passwordInputResult as PasswordInputResult);
   };
 }

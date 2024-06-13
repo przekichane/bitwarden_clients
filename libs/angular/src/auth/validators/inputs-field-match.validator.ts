@@ -7,8 +7,6 @@ export class InputsFieldMatch {
    *  Check to ensure two fields do not have the same value
    *
    * @deprecated Use compareInputs() instead
-   *
-   * // TODO-rr-bw: consider just replacing deprecated custom validators in this PR.
    */
   static validateInputsDoesntMatch(matchTo: string, errorMessage: string): ValidatorFn {
     return (control: AbstractControl) => {
@@ -26,7 +24,6 @@ export class InputsFieldMatch {
     };
   }
 
-  // TODO-rr-bw: Check we we can remove this (we are not currently using it)
   //check to ensure two fields have the same value
   static validateInputsMatch(matchTo: string, errorMessage: string): ValidatorFn {
     return (control: AbstractControl) => {
@@ -55,8 +52,6 @@ export class InputsFieldMatch {
    * - Use formBuilder.group() overload with AbstractControlOptions type instead {@link https://angular.dev/api/forms/AbstractControlOptions}
    *
    * Remove this method after deprecated instances are replaced
-   *
-   * // TODO-rr-bw: consider just replacing deprecated custom validators in this PR.
    */
   static validateFormInputsMatch(field: string, fieldMatchTo: string, errorMessage: string) {
     return (formGroup: UntypedFormGroup) => {
@@ -122,8 +117,6 @@ export class InputsFieldMatch {
           return fail();
         }
       }
-
-      // TODO-rr-bw: default return?
 
       function fail() {
         controlThatShowsError.setErrors({
