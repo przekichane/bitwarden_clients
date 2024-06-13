@@ -27,7 +27,7 @@ import { InputsFieldMatch } from "../../../../angular/src/auth/validators/inputs
 import { SharedModule } from "../../../../components/src/shared";
 import { PasswordCalloutComponent } from "../password-callout/password-callout.component";
 
-export interface PasswordInput {
+export interface PasswordInputResult {
   masterKeyHash: string;
   hint?: string;
 }
@@ -63,6 +63,7 @@ export class InputPasswordComponent implements OnInit {
   protected masterPasswordPolicy: MasterPasswordPolicyOptions;
   protected passwordStrengthResult: any;
   protected showErrorSummary = false;
+  protected showPassword = false;
 
   protected formGroup = this.formBuilder.group(
     {
@@ -109,7 +110,6 @@ export class InputPasswordComponent implements OnInit {
     this.email = await firstValueFrom(
       this.accountService.activeAccount$.pipe(map((a) => a?.email)),
     );
-
     this.masterPasswordPolicy = await this.policyApiService.getMasterPasswordPolicyOptsForOrgUser(
       this.orgId,
     );
@@ -178,12 +178,12 @@ export class InputPasswordComponent implements OnInit {
     );
     const newMasterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, newMasterKey);
 
-    const passwordInput = {
+    const passwordInputResult = {
       masterKeyHash: newMasterKeyHash,
       hint: this.formGroup.controls.hint.value,
     };
 
-    console.log("reached end -> passwordInput", passwordInput);
-    this.onPasswordFormSubmit.emit(passwordInput as PasswordInput);
+    console.log("reached end -> passwordInput", passwordInputResult);
+    this.onPasswordFormSubmit.emit(passwordInputResult as PasswordInputResult);
   };
 }

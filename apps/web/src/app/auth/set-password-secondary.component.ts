@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { firstValueFrom } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
-import { InputPasswordComponent, PasswordInput } from "@bitwarden/auth/angular";
+import { InputPasswordComponent, PasswordInputResult } from "@bitwarden/auth/angular";
 
 @Component({
   standalone: true,
@@ -31,7 +31,7 @@ export class SetPasswordSecondaryComponent implements OnInit {
     this.orgId = qParams.orgId;
   }
 
-  getPasswordInput(passwordInput: PasswordInput) {
+  getPasswordInput(passwordInput: PasswordInputResult) {
     console.log(passwordInput);
   }
 }
