@@ -93,6 +93,11 @@ export class InputsFieldMatch {
     return (control: AbstractControl): ValidationErrors | null => {
       const controlA = control.get(controlNameA);
       const controlB = control.get(controlNameB);
+
+      if (!controlA || !controlB) {
+        return null;
+      }
+
       const controlThatShowsError = showErrorOn === "controlA" ? controlA : controlB;
 
       // Don't compare empty strings
@@ -117,6 +122,8 @@ export class InputsFieldMatch {
           return fail();
         }
       }
+
+      return null; // default return
 
       function fail() {
         controlThatShowsError.setErrors({
