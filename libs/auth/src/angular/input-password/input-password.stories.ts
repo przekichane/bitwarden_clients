@@ -63,7 +63,23 @@ export default {
         {
           provide: PasswordStrengthServiceAbstraction,
           useValue: {
-            getPasswordStrength: () => ({ score: null }) as ZXCVBNResult,
+            getPasswordStrength: (password) => {
+              let score = 0;
+
+              if (password.length === 0) {
+                score = null;
+              } else if (password.length <= 4) {
+                score = 1;
+              } else if (password.length <= 8) {
+                score = 2;
+              } else if (password.length <= 12) {
+                score = 3;
+              } else {
+                score = 4;
+              }
+
+              return { score } as ZXCVBNResult;
+            },
           } as Partial<PasswordStrengthServiceAbstraction>,
         },
         {
