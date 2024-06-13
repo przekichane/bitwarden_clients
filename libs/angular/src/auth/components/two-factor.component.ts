@@ -225,7 +225,7 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
     }
   }
 
-  async submit() {
+  submit = async () => {
     await this.setupCaptcha();
 
     if (this.token == null || this.token === "") {
@@ -250,14 +250,11 @@ export class TwoFactorComponent extends CaptchaProtectedComponent implements OnI
       this.token = this.token.replace(" ", "").trim();
     }
 
-    try {
-      await this.doSubmit();
-    } catch {
-      if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && this.webAuthn != null) {
-        this.webAuthn.start();
-      }
+    await this.doSubmit();
+    if (this.selectedProviderType === TwoFactorProviderType.WebAuthn && this.webAuthn != null) {
+      this.webAuthn.start();
     }
-  }
+  };
 
   async doSubmit() {
     this.formPromise = this.loginStrategyService.logInTwoFactor(
