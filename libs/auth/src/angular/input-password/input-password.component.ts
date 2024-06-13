@@ -1,15 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
-import { firstValueFrom, map } from "rxjs";
 
 import { JslibModule } from "@bitwarden/angular/jslib.module";
 import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
-import { AccountService } from "@bitwarden/common/auth/abstractions/account.service";
-import { KdfConfigService } from "@bitwarden/common/auth/abstractions/kdf-config.service";
-import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
 import { Utils } from "@bitwarden/common/platform/misc/utils";
 import {
@@ -28,7 +24,7 @@ import { SharedModule } from "../../../../components/src/shared";
 import { PasswordCalloutComponent } from "../password-callout/password-callout.component";
 
 export interface PasswordInputResult {
-  masterKeyHash: string;
+  password: string;
   hint?: string;
 }
 
@@ -58,7 +54,6 @@ export class InputPasswordComponent implements OnInit {
   private minHintLength = 0;
   protected maxHintLength = 50;
 
-  protected email: string;
   protected minPasswordLength = Utils.minimumPasswordLength;
   protected masterPasswordPolicy: MasterPasswordPolicyOptions;
   protected passwordStrengthResult: any;
@@ -94,22 +89,16 @@ export class InputPasswordComponent implements OnInit {
   );
 
   constructor(
-    private accountService: AccountService,
     private auditService: AuditService,
-    private cryptoService: CryptoService,
     private dialogService: DialogService,
     private formBuilder: FormBuilder,
     private i18nService: I18nService,
-    private kdfConfigService: KdfConfigService,
     private policyService: PolicyService,
     private toastService: ToastService,
     private policyApiService: PolicyApiServiceAbstraction,
   ) {}
 
   async ngOnInit() {
-    this.email = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.email)),
-    );
     this.masterPasswordPolicy = await this.policyApiService.getMasterPasswordPolicyOptsForOrgUser(
       this.orgId,
     );
@@ -162,22 +151,8 @@ export class InputPasswordComponent implements OnInit {
       return;
     }
 
-    // Create and hash new master key
-    const masterPassword = this.formGroup.controls.password.value;
-    const email = await firstValueFrom(
-      this.accountService.activeAccount$.pipe(map((a) => a?.email)),
-    );
-    const kdfConfig = await this.kdfConfigService.getKdfConfig();
-
-    const newMasterKey = await this.cryptoService.makeMasterKey(
-      masterPassword,
-      email.trim().toLowerCase(),
-      kdfConfig,
-    );
-    const newMasterKeyHash = await this.cryptoService.hashMasterKey(masterPassword, newMasterKey);
-
     const passwordInputResult = {
-      masterKeyHash: newMasterKeyHash,
+      password: this.formGroup.controls.password.value,
       hint: this.formGroup.controls.hint.value,
     };
 
