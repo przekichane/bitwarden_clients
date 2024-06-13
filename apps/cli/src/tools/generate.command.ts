@@ -1,14 +1,16 @@
-import { StateService } from "@bitwarden/common/platform/abstractions/state.service";
-import { DefaultPassphraseGenerationOptions } from "@bitwarden/common/tools/generator/passphrase";
+import { StateService } from "@bitwarden/common/src/platform/abstractions/state.service";
 import {
   DefaultPasswordGenerationOptions,
-  PasswordGenerationServiceAbstraction,
-} from "@bitwarden/common/tools/generator/password";
-import { PasswordGeneratorOptions } from "@bitwarden/common/tools/generator/password/password-generator-options";
+  DefaultPassphraseGenerationOptions,
+} from "@bitwarden/generator-core";
+import { legacyPassword } from "@bitwarden/generator-extensions";
 
 import { Response } from "../models/response";
 import { StringResponse } from "../models/response/string.response";
 import { CliUtils } from "../utils";
+
+type PasswordGeneratorOptions = legacyPassword.PasswordGeneratorOptions;
+type PasswordGenerationServiceAbstraction = legacyPassword.PasswordGenerationServiceAbstraction;
 
 export class GenerateCommand {
   constructor(
