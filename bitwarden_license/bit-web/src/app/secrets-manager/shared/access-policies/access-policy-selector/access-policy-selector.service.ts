@@ -82,11 +82,11 @@ export class AccessPolicySelectorService {
     const groupReadWritePolicies = (policies as Array<ApItemValueType | ApItemViewType>).filter(
       (s) =>
         s.type === ApItemEnum.Group &&
-        s.permission == ApPermissionEnum.CanReadWrite &&
+        s.permission === ApPermissionEnum.CanReadWrite &&
         s.currentUserInGroup,
     );
 
-    if (groupReadWritePolicies.length > 0 || userReadWritePolicy != null) {
+    if (groupReadWritePolicies.length > 0 || userReadWritePolicy !== undefined) {
       return true;
     }
     return false;

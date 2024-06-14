@@ -103,7 +103,7 @@ export class SecretDialogComponent implements OnInit {
     return this.data.operation === OperationType.Add ? "newSecret" : "editSecret";
   }
 
-  get subtitle() {
+  get subtitle(): string | undefined {
     if (this.data.operation === OperationType.Edit) {
       return this.formGroup.get("name").value;
     }
@@ -120,7 +120,7 @@ export class SecretDialogComponent implements OnInit {
     } else if (this.data.operation !== OperationType.Add) {
       this.dialogRef.close();
       throw new Error(`The secret dialog was not called with the appropriate operation values.`);
-    } else if (this.data.operation == OperationType.Add) {
+    } else if (this.data.operation === OperationType.Add) {
       await this.loadAddDialog();
     }
 
@@ -234,8 +234,8 @@ export class SecretDialogComponent implements OnInit {
         type: m.type,
         id: m.id,
         permission: m.permission,
-        currentUser: m.type == ApItemEnum.User ? m.currentUser : null,
-        currentUserInGroup: m.type == ApItemEnum.Group ? m.currentUserInGroup : null,
+        currentUser: m.type === ApItemEnum.User ? m.currentUser : null,
+        currentUserInGroup: m.type === ApItemEnum.Group ? m.currentUserInGroup : null,
       })),
       serviceAccountAccessPolicies: currentServiceAccountPolicies.map((m) => ({
         type: m.type,
@@ -252,7 +252,11 @@ export class SecretDialogComponent implements OnInit {
       this.data.organizationId,
     );
 
-    if (this.data.projectId == null || this.data.projectId == "") {
+    if (
+      this.data.projectId === null ||
+      this.data.projectId === "" ||
+      this.data.projectId === undefined
+    ) {
       this.addNewProjectOptionToProjectsDropDown();
     }
 
@@ -268,7 +272,7 @@ export class SecretDialogComponent implements OnInit {
 
     if (currentProjects?.length > 0) {
       const currentProject = currentProjects?.[0];
-      if (this.projects.find((p) => p.id === currentProject.id) == undefined) {
+      if (this.projects.find((p) => p.id === currentProject.id) === undefined) {
         const listView = new ProjectListView();
         listView.id = currentProject.id;
         listView.name = currentProject.name;
