@@ -175,10 +175,8 @@ export class SecretService {
 
     secretView.projects?.forEach((e) => request.projectIds.push(e.id));
 
-    if (secretAccessPoliciesView) {
-      request.accessPoliciesRequests =
-        this.accessPolicyService.getSecretAccessPoliciesRequest(secretAccessPoliciesView);
-    }
+    request.accessPoliciesRequests =
+      this.accessPolicyService.getSecretAccessPoliciesRequest(secretAccessPoliciesView);
 
     return request;
   }
