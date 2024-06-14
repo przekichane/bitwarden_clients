@@ -33,7 +33,7 @@ export const USES_KEY_CONNECTOR = new UserKeyDefinition<boolean>(
   KEY_CONNECTOR_DISK,
   "usesKeyConnector",
   {
-    deserializer: (usesKeyConnector) => usesKeyConnector,
+    deserializer: (usesKeyConnector) => usesKeyConnector ?? false,
     clearOn: ["logout"],
   },
 );
@@ -42,7 +42,7 @@ export const CONVERT_ACCOUNT_TO_KEY_CONNECTOR = new UserKeyDefinition<boolean>(
   KEY_CONNECTOR_DISK,
   "convertAccountToKeyConnector",
   {
-    deserializer: (convertAccountToKeyConnector) => convertAccountToKeyConnector,
+    deserializer: (convertAccountToKeyConnector) => convertAccountToKeyConnector ?? false,
     clearOn: ["logout"],
   },
 );
