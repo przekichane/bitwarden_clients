@@ -9,6 +9,7 @@ import { AuditService } from "@bitwarden/common/abstractions/audit.service";
 import { PolicyApiServiceAbstraction } from "@bitwarden/common/admin-console/abstractions/policy/policy-api.service.abstraction";
 import { PolicyService } from "@bitwarden/common/admin-console/abstractions/policy/policy.service.abstraction";
 import { MasterPasswordPolicyOptions } from "@bitwarden/common/admin-console/models/domain/master-password-policy-options";
+import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { PasswordStrengthServiceAbstraction } from "@bitwarden/common/tools/password-strength";
 import { DialogService, ToastService } from "@bitwarden/components";
 
@@ -17,7 +18,7 @@ import { PreloadedEnglishI18nModule } from "../../../../../apps/web/src/app/core
 import { InputPasswordComponent } from "./input-password.component";
 
 const mockMasterPasswordPolicyOptions = {
-  minComplexity: 3,
+  minComplexity: 4,
   minLength: 10,
   requireUpper: true,
   requireLower: true,
@@ -42,6 +43,13 @@ export default {
           } as Partial<AuditService>,
         },
         {
+          provide: CryptoService,
+          useValue: {
+            makeMasterKey: () => Promise.resolve("example-master-key"),
+            hashMasterKey: () => Promise.resolve("example-master-key-hash"),
+          },
+        },
+        {
           provide: DialogService,
           useValue: {
             openSimpleDialog: () => Promise.resolve(true),
@@ -57,7 +65,12 @@ export default {
           provide: PolicyService,
           useValue: {
             masterPasswordPolicyOptions$: () => of(mockMasterPasswordPolicyOptions),
-            evaluateMasterPassword: () => true,
+            evaluateMasterPassword: (score) => {
+              if (score < 4) {
+                return false;
+              }
+              return true;
+            },
           } as Partial<PolicyService>,
         },
         {
