@@ -889,6 +889,7 @@ export default class MainBackground {
       this.scriptInjectorService,
       this.accountService,
       this.authService,
+      messageListener,
     );
     this.auditService = new AuditService(this.cryptoFunctionService, this.apiService);
 
@@ -937,7 +938,6 @@ export default class MainBackground {
       logoutCallback,
       this.stateService,
       this.authService,
-      this.authRequestService,
       this.messagingService,
     );
 
