@@ -24,6 +24,7 @@ export class IsEnterpriseOrgGuard implements CanActivate {
       this.configService.getFeatureFlag$(FeatureFlag.MemberAccessReport),
     );
 
+    // TODO: Remove on "MemberAccessReport" feature flag cleanup
     if (!isMemberAccessReportEnabled) {
       return this.router.createUrlTree(["/"]);
     }

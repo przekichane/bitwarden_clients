@@ -27,6 +27,7 @@ export class ReportsHomeComponent implements OnInit {
   ) {}
 
   async ngOnInit() {
+    // TODO: Remove on "MemberAccessReport" feature flag cleanup
     this.isMemberAccessReportEnabled = await firstValueFrom(
       this.configService.getFeatureFlag$(FeatureFlag.MemberAccessReport),
     );
