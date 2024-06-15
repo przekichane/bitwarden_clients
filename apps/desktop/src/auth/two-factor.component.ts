@@ -149,22 +149,14 @@ export class TwoFactorComponent extends BaseTwoFactorComponent {
   }
 
   override async launchDuoFrameless() {
-    const duoHandOffMessage = {
-      title: this.i18nService.t("youSuccessfullyLoggedIn"),
-      message: this.i18nService.t("youMayCloseThisWindow"),
-      isCountdown: false,
-    };
-
-    // we're using the connector here as a way to set a cookie with translations
-    // before continuing to the duo frameless url
     const env = await firstValueFrom(this.environmentService.environment$);
     const launchUrl =
       env.getWebVaultUrl() +
       "/duo-redirect-connector.html" +
-      "?duoFramelessUrl=" +
-      encodeURIComponent(this.duoFramelessUrl) +
-      "&handOffMessage=" +
-      encodeURIComponent(JSON.stringify(duoHandOffMessage));
+      "?locale=" +
+      encodeURIComponent(this.i18nService.translationLocale) +
+      "&duoFramelessUrl=" +
+      encodeURIComponent(this.duoFramelessUrl);
     this.platformUtilsService.launchUri(launchUrl);
   }
 
