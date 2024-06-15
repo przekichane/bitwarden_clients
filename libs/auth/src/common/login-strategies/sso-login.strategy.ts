@@ -9,11 +9,8 @@ import { SsoTokenRequest } from "@bitwarden/common/auth/models/request/identity-
 import { AuthRequestResponse } from "@bitwarden/common/auth/models/response/auth-request.response";
 import { IdentityTokenResponse } from "@bitwarden/common/auth/models/response/identity-token.response";
 import { HttpStatusCode } from "@bitwarden/common/enums";
-import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
 import { ErrorResponse } from "@bitwarden/common/models/response/error.response";
-import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { LogLevelType } from "@bitwarden/common/platform/enums";
 import { UserId } from "@bitwarden/common/types/guid";
 
 import { AuthRequestServiceAbstraction } from "../abstractions";
@@ -74,7 +71,6 @@ export class SsoLoginStrategy extends LoginStrategy {
     private deviceTrustService: DeviceTrustServiceAbstraction,
     private authRequestService: AuthRequestServiceAbstraction,
     private i18nService: I18nService,
-    private configService: ConfigService,
     ...sharedDeps: ConstructorParameters<typeof LoginStrategy>
   ) {
     super(...sharedDeps);
@@ -93,7 +89,7 @@ export class SsoLoginStrategy extends LoginStrategy {
 
     const deviceRequest = await this.buildDeviceRequest();
 
-    await this.logDeviceTrust("Logging in with appId " + deviceRequest.identifier);
+    this.logService.info("Logging in with appId %s.", deviceRequest.identifier);
 
     data.tokenRequest = new SsoTokenRequest(
       credentials.code,
@@ -203,7 +199,7 @@ export class SsoLoginStrategy extends LoginStrategy {
 
     // Note: TDE and key connector are mutually exclusive
     if (userDecryptionOptions?.trustedDeviceOption) {
-      await this.logDeviceTrust("Attempting to set user key with approved admin auth request.");
+      this.logService.info("Attempting to set user key with approved admin auth request.");
 
       // Try to use the user key from an approved admin request if it exists.
       // Using it will clear it from state and future requests will use the device key.
@@ -213,7 +209,7 @@ export class SsoLoginStrategy extends LoginStrategy {
 
       // Only try to set user key with device key if admin approval request was not successful.
       if (!hasUserKey) {
-        await this.logDeviceTrust("Attempting to set user key with device key.");
+        this.logService.info("Attempting to set user key with device key.");
 
         await this.trySetUserKeyWithDeviceKey(tokenResponse, userId);
       }
@@ -300,22 +296,15 @@ export class SsoLoginStrategy extends LoginStrategy {
 
     if (!deviceKey || !encDevicePrivateKey || !encUserKey) {
       if (!deviceKey) {
-        await this.logDeviceTrust(
-          "Unable to set user key due to missing device key.",
-          LogLevelType.Warning,
-        );
+        await this.logService.warning("Unable to set user key due to missing device key.");
       }
       if (!encDevicePrivateKey) {
-        await this.logDeviceTrust(
+        await this.logService.warning(
           "Unable to set user key due to missing encrypted device private key.",
-          LogLevelType.Warning,
         );
       }
       if (!encUserKey) {
-        await this.logDeviceTrust(
-          "Unable to set user key due to missing encrypted user key.",
-          LogLevelType.Warning,
-        );
+        await this.logService.warning("Unable to set user key due to missing encrypted user key.");
       }
       return;
     }
@@ -365,21 +354,5 @@ export class SsoLoginStrategy extends LoginStrategy {
     return {
       sso: this.cache.value,
     };
-  }
-
-  async logDeviceTrust(
-    message: string,
-    level: LogLevelType.Warning | LogLevelType.Info = LogLevelType.Info,
-  ) {
-    if (await this.configService.getFeatureFlag(FeatureFlag.DeviceTrustLogging)) {
-      switch (level) {
-        case LogLevelType.Info:
-          this.logService.info(message);
-          break;
-        case LogLevelType.Warning:
-          this.logService.warning(message);
-          break;
-      }
-    }
   }
 }

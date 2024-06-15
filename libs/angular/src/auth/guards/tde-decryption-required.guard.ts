@@ -10,8 +10,6 @@ import { firstValueFrom } from "rxjs";
 import { AuthService } from "@bitwarden/common/auth/abstractions/auth.service";
 import { DeviceTrustServiceAbstraction } from "@bitwarden/common/auth/abstractions/device-trust.service.abstraction";
 import { AuthenticationStatus } from "@bitwarden/common/auth/enums/authentication-status";
-import { FeatureFlag } from "@bitwarden/common/enums/feature-flag.enum";
-import { ConfigService } from "@bitwarden/common/platform/abstractions/config/config.service";
 import { CryptoService } from "@bitwarden/common/platform/abstractions/crypto.service";
 import { LogService } from "@bitwarden/common/platform/abstractions/log.service";
 
@@ -26,7 +24,6 @@ export function tdeDecryptionRequiredGuard(): CanActivateFn {
     const authService = inject(AuthService);
     const cryptoService = inject(CryptoService);
     const deviceTrustService = inject(DeviceTrustServiceAbstraction);
-    const configService = inject(ConfigService);
     const logService = inject(LogService);
     const router = inject(Router);
 
@@ -44,14 +41,12 @@ export function tdeDecryptionRequiredGuard(): CanActivateFn {
       return router.createUrlTree(["/"]);
     }
 
-    if (await configService.getFeatureFlag(FeatureFlag.DeviceTrustLogging)) {
-      logService.info(
-        "Sending user to TDE decryption options. AuthStatus is %s. TDE support is %s. Ever had user key is %s.",
-        AuthenticationStatus[authStatus],
-        tdeEnabled,
-        everHadUserKey,
-      );
-    }
+    logService.info(
+      "Sending user to TDE decryption options. AuthStatus is %s. TDE support is %s. Ever had user key is %s.",
+      AuthenticationStatus[authStatus],
+      tdeEnabled,
+      everHadUserKey,
+    );
 
     return true;
   };

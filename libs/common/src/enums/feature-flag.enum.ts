@@ -17,7 +17,6 @@ export enum FeatureFlag {
   RestrictProviderAccess = "restrict-provider-access",
   UseTreeWalkerApiForPageDetailsCollection = "use-tree-walker-api-for-page-details-collection",
   BulkDeviceApproval = "bulk-device-approval",
-  DeviceTrustLogging = "device-trust-logging",
   EmailVerification = "email-verification",
 }
 
@@ -46,7 +45,6 @@ export const DefaultFeatureFlagValue = {
   [FeatureFlag.RestrictProviderAccess]: FALSE,
   [FeatureFlag.UseTreeWalkerApiForPageDetailsCollection]: FALSE,
   [FeatureFlag.BulkDeviceApproval]: FALSE,
-  [FeatureFlag.DeviceTrustLogging]: FALSE,
   [FeatureFlag.EmailVerification]: FALSE,
 } satisfies Record<FeatureFlag, AllowedFeatureFlagTypes>;
 
