@@ -568,15 +568,6 @@ export class ServiceContainer {
       this.kdfConfigService,
     );
 
-    this.configApiService = new ConfigApiService(this.apiService, this.tokenService);
-
-    this.configService = new DefaultConfigService(
-      this.configApiService,
-      this.environmentService,
-      this.logService,
-      this.stateProvider,
-    );
-
     this.authService = new AuthService(
       this.accountService,
       this.messagingService,
@@ -584,6 +575,15 @@ export class ServiceContainer {
       this.apiService,
       this.stateService,
       this.tokenService,
+    );
+
+    this.configApiService = new ConfigApiService(this.apiService, this.tokenService);
+
+    this.configService = new DefaultConfigService(
+      this.configApiService,
+      this.environmentService,
+      this.logService,
+      this.stateProvider,
     );
 
     this.cipherService = new CipherService(
