@@ -3,7 +3,6 @@ import { RouterModule, Routes } from "@angular/router";
 
 import { AuthGuard } from "@bitwarden/angular/auth/guards";
 import { canAccessSettingsTab } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
-import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { organizationPermissionsGuard } from "@bitwarden/web-vault/app/admin-console/organizations/guards/org-permissions.guard";
 import { OrganizationLayoutComponent } from "@bitwarden/web-vault/app/admin-console/organizations/layouts/organization-layout.component";
 
@@ -25,9 +24,7 @@ const routes: Routes = [
           {
             path: "domain-verification",
             component: DomainVerificationComponent,
-            canActivate: [
-              organizationPermissionsGuard((org: Organization) => org.canManageDomainVerification),
-            ],
+            canActivate: [organizationPermissionsGuard((org) => org.canManageDomainVerification)],
             data: {
               titleId: "domainVerification",
             },
@@ -35,7 +32,7 @@ const routes: Routes = [
           {
             path: "sso",
             component: SsoComponent,
-            canActivate: [organizationPermissionsGuard((org: Organization) => org.canManageSso)],
+            canActivate: [organizationPermissionsGuard((org) => org.canManageSso)],
             data: {
               titleId: "singleSignOn",
             },
@@ -43,7 +40,7 @@ const routes: Routes = [
           {
             path: "scim",
             component: ScimComponent,
-            canActivate: [organizationPermissionsGuard((org: Organization) => org.canManageScim)],
+            canActivate: [organizationPermissionsGuard((org) => org.canManageScim)],
             data: {
               titleId: "scim",
             },
@@ -54,9 +51,7 @@ const routes: Routes = [
               import("./manage/device-approvals/device-approvals.component").then(
                 (mod) => mod.DeviceApprovalsComponent,
               ),
-            canActivate: [
-              organizationPermissionsGuard((org: Organization) => org.canManageDeviceApprovals),
-            ],
+            canActivate: [organizationPermissionsGuard((org) => org.canManageDeviceApprovals)],
             data: {
               titleId: "deviceApprovals",
             },

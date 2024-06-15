@@ -83,7 +83,7 @@ const routes: Routes = [
       {
         path: "events",
         component: EventsComponent,
-        canActivate: [organizationPermissionsGuard((org: Organization) => org.canAccessEventLogs)],
+        canActivate: [organizationPermissionsGuard((org) => org.canAccessEventLogs)],
         data: {
           titleId: "eventLogs",
         },

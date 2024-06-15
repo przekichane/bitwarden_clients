@@ -1,7 +1,6 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 
-import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { organizationPermissionsGuard } from "@bitwarden/web-vault/app/admin-console/organizations/guards/org-permissions.guard";
 
 import { SecretsManagerExportComponent } from "./porting/sm-export.component";
@@ -11,7 +10,7 @@ const routes: Routes = [
   {
     path: "import",
     component: SecretsManagerImportComponent,
-    canActivate: [organizationPermissionsGuard((org: Organization) => org.isAdmin)],
+    canActivate: [organizationPermissionsGuard((org) => org.isAdmin)],
     data: {
       titleId: "importData",
     },
@@ -19,7 +18,7 @@ const routes: Routes = [
   {
     path: "export",
     component: SecretsManagerExportComponent,
-    canActivate: [organizationPermissionsGuard((org: Organization) => org.isAdmin)],
+    canActivate: [organizationPermissionsGuard((org) => org.isAdmin)],
     data: {
       titleId: "exportData",
     },

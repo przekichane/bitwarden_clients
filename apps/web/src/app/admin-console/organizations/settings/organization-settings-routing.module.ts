@@ -34,7 +34,7 @@ const routes: Routes = [
       {
         path: "policies",
         component: PoliciesComponent,
-        canActivate: [organizationPermissionsGuard((org: Organization) => org.canManagePolicies)],
+        canActivate: [organizationPermissionsGuard((org) => org.canManagePolicies)],
         data: {
           titleId: "policies",
         },
@@ -46,9 +46,7 @@ const routes: Routes = [
             path: "import",
             loadComponent: () =>
               import("./org-import.component").then((mod) => mod.OrgImportComponent),
-            canActivate: [
-              organizationPermissionsGuard((org: Organization) => org.canAccessImportExport),
-            ],
+            canActivate: [organizationPermissionsGuard((org) => org.canAccessImportExport)],
             data: {
               titleId: "importData",
             },

@@ -2,7 +2,6 @@ import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 
 import { canAccessBillingTab } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
-import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 
 import { organizationPermissionsGuard } from "../../admin-console/organizations/guards/org-permissions.guard";
 import { organizationIsUnmanaged } from "../../billing/guards/organization-is-unmanaged.guard";
@@ -30,7 +29,7 @@ const routes: Routes = [
         path: "payment-method",
         component: PaymentMethodComponent,
         canActivate: [
-          organizationPermissionsGuard((org: Organization) => org.canEditPaymentMethods),
+          organizationPermissionsGuard((org) => org.canEditPaymentMethods),
           organizationIsUnmanaged,
         ],
         data: {
@@ -41,7 +40,7 @@ const routes: Routes = [
         path: "history",
         component: OrgBillingHistoryViewComponent,
         canActivate: [
-          organizationPermissionsGuard((org: Organization) => org.canViewBillingHistory),
+          organizationPermissionsGuard((org) => org.canViewBillingHistory),
           organizationIsUnmanaged,
         ],
         data: {
