@@ -12,8 +12,8 @@ import {
 } from "@bitwarden/common/admin-console/abstractions/organization/organization.service.abstraction";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
+import { ToastService } from "@bitwarden/components";
 
 /**
  * `CanActivateFn` that asserts the logged in user has permission to access
@@ -41,7 +41,7 @@ export function organizationPermissionsGuard(
   return async (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
     const router = inject(Router);
     const organizationService = inject(OrganizationService);
-    const platformUtilsService = inject(PlatformUtilsService);
+    const toastService = inject(ToastService);
     const i18nService = inject(I18nService);
     const syncService = inject(SyncService);
 
@@ -56,7 +56,11 @@ export function organizationPermissionsGuard(
     }
 
     if (!org.isOwner && !org.enabled) {
-      platformUtilsService.showToast("error", null, i18nService.t("organizationIsDisabled"));
+      toastService.showToast({
+        variant: "error",
+        title: null,
+        message: i18nService.t("organizationIsDisabled"),
+      });
       return router.createUrlTree(["/"]);
     }
 
@@ -75,7 +79,11 @@ export function organizationPermissionsGuard(
         });
       }
 
-      platformUtilsService.showToast("error", null, i18nService.t("accessDenied"));
+      toastService.showToast({
+        variant: "error",
+        title: null,
+        message: i18nService.t("accessDenied"),
+      });
       return canAccessOrgAdmin(org)
         ? router.createUrlTree(["/organizations", org.id])
         : router.createUrlTree(["/"]);

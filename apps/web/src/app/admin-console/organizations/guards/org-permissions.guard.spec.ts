@@ -11,8 +11,8 @@ import { OrganizationService } from "@bitwarden/common/admin-console/abstraction
 import { OrganizationUserType } from "@bitwarden/common/admin-console/enums";
 import { Organization } from "@bitwarden/common/admin-console/models/domain/organization";
 import { I18nService } from "@bitwarden/common/platform/abstractions/i18n.service";
-import { PlatformUtilsService } from "@bitwarden/common/platform/abstractions/platform-utils.service";
 import { SyncService } from "@bitwarden/common/vault/abstractions/sync/sync.service.abstraction";
+import { ToastService } from "@bitwarden/components";
 
 import { organizationPermissionsGuard } from "./org-permissions.guard";
 
@@ -50,7 +50,7 @@ describe("Organization Permissions Guard", () => {
       providers: [
         { provide: Router, useValue: router },
         { provide: OrganizationService, useValue: organizationService },
-        { provide: PlatformUtilsService, useValue: mock<PlatformUtilsService>() },
+        { provide: ToastService, useValue: mock<ToastService>() },
         { provide: I18nService, useValue: mock<I18nService>() },
         { provide: SyncService, useValue: mock<SyncService>() },
       ],
