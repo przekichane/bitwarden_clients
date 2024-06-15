@@ -41,9 +41,6 @@ describe("Organization Permissions Guard", () => {
       params: {
         organizationId: orgFactory().id,
       },
-      data: {
-        organizationPermissions: null,
-      },
     });
 
     TestBed.configureTestingModule({
