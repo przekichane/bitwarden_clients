@@ -52,7 +52,12 @@
       </div>
       <div class="mx-4">
         <h3 class="mb-0">
-          <div class="font-weight-semibold tw-text-base">{{ p.name }}</div>
+          <div
+            class="font-weight-semibold tw-text-base"
+            [style]="p.enabled || p.premium ? 'display:inline-block' : ''"
+          >
+            {{ p.name }}
+          </div>
           <ng-container *ngIf="p.enabled">
             <i
               class="bwi bwi-check text-success bwi-fw"
